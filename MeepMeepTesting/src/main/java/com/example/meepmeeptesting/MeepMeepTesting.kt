@@ -17,7 +17,7 @@ object MeepMeepTesting {
                 .followTrajectorySequence { drive: DriveShim ->
                     drive.trajectorySequenceBuilder(
                         Pose2d(
-                            0.0,
+                            1.0,
                             0.0,
                             0.0
                         )
