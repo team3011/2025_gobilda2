@@ -24,7 +24,7 @@ object MeepMeepTesting {
                     )
                         .forward(45.0)
                         .turn(Math.toRadians(45.0))
-                        .forward(1.0)
+                        .forward(20.0)
                         .turn(Math.toRadians(45.0))
                         .forward(30.0)
                         .turn(Math.toRadians(90.0))
