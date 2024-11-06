@@ -1,25 +1,17 @@
 package org.firstinspires.ftc.teamcode.roadrunner;
 
 
-
-
-
-
-import com.acmerobotics.roadrunner.DualNum;
-import com.acmerobotics.roadrunner.MecanumKinematics;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.PoseVelocity2dDual;
-import com.acmerobotics.roadrunner.Time;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.PoseMessage;
-import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 
 
 /**
@@ -30,6 +22,83 @@ import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
  * Unless otherwise noted, comments are from Gobilda
  */
 public class PinpointDrive extends MecanumDrive {
+    public static Params PARAMS = new Params();
+    public GoBildaPinpointDriverRR pinpoint;
+    private Pose2d lastPinpointPose = pose;
+    public PinpointDrive(HardwareMap hardwareMap, Pose2d pose) {
+        super(hardwareMap, pose);
+        FlightRecorder.write("PINPOINT_PARAMS", PARAMS);
+        pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class, "pinpoint");
+
+
+        // RR localizer note: don't love this conversion (change driver?)
+        pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
+
+
+        pinpoint.setEncoderResolution(PARAMS.encoderResolution);
+
+
+        pinpoint.setEncoderDirections(PARAMS.xDirection, PARAMS.yDirection);
+
+
+       /*
+       Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
+       The IMU will automatically calibrate when first powered on, but recalibrating before running
+       the robot is a good idea to ensure that the calibration is "good".
+       resetPosAndIMU will reset the position to 0,0,0 and also recalibrate the IMU.
+       This is recommended before you run your autonomous, as a bad initial calibration can cause
+       an incorrect starting value for x, y, and heading.
+        */
+        //pinpoint.recalibrateIMU();
+        pinpoint.resetPosAndIMU();
+        // wait for pinpoint to finish calibrating
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        pinpoint.setPosition(pose);
+
+    }
+
+    @Override
+    public PoseVelocity2d updatePoseEstimate() {
+        if (lastPinpointPose != pose) {
+            // RR localizer note:
+            // Something else is modifying our pose (likely for relocalization),
+            // so we override otos pose with the new pose.
+            // This could potentially cause up to 1 loop worth of drift.
+            // I don't like this solution at all, but it preserves compatibility.
+            // The only alternative is to add getter and setters, but that breaks compat.
+            // Potential alternate solution: timestamp the pose set and backtrack it based on speed?
+            pinpoint.setPosition(pose);
+        }
+        pinpoint.update();
+        pose = pinpoint.getPositionRR();
+        lastPinpointPose = pose;
+
+
+        // RR standard
+        poseHistory.add(pose);
+        while (poseHistory.size() > 100) {
+            poseHistory.removeFirst();
+        }
+
+
+        FlightRecorder.write("ESTIMATED_POSE", new PoseMessage(pose));
+        FlightRecorder.write("PINPOINT_RAW_POSE", new FTCPoseMessage(pinpoint.getPosition()));
+        FlightRecorder.write("PINPOINT_STATUS", pinpoint.getDeviceStatus());
+
+
+        return pinpoint.getVelocityRR();
+    }
+
+    public GoBildaPinpointDriverRR getPinpoint() {
+        return pinpoint;
+    }
+
     public static class Params {
         /*
         Set the odometry pod positions relative to the point that the odometry computer tracks around.
@@ -68,85 +137,6 @@ public class PinpointDrive extends MecanumDrive {
         public GoBildaPinpointDriver.EncoderDirection yDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
     }
 
-
-    public static Params PARAMS = new Params();
-    public GoBildaPinpointDriverRR pinpoint;
-    private Pose2d lastPinpointPose = pose;
-
-
-    public PinpointDrive(HardwareMap hardwareMap, Pose2d pose) {
-        super(hardwareMap, pose);
-        FlightRecorder.write("PINPOINT_PARAMS",PARAMS);
-        pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
-
-
-        // RR localizer note: don't love this conversion (change driver?)
-        pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
-
-
-
-
-        pinpoint.setEncoderResolution(PARAMS.encoderResolution);
-
-
-        pinpoint.setEncoderDirections(PARAMS.xDirection, PARAMS.yDirection);
-
-
-       /*
-       Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
-       The IMU will automatically calibrate when first powered on, but recalibrating before running
-       the robot is a good idea to ensure that the calibration is "good".
-       resetPosAndIMU will reset the position to 0,0,0 and also recalibrate the IMU.
-       This is recommended before you run your autonomous, as a bad initial calibration can cause
-       an incorrect starting value for x, y, and heading.
-        */
-        //pinpoint.recalibrateIMU();
-        pinpoint.resetPosAndIMU();
-        // wait for pinpoint to finish calibrating
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        pinpoint.setPosition(pose);
-    }
-    @Override
-    public PoseVelocity2d updatePoseEstimate() {
-        if (lastPinpointPose != pose) {
-            // RR localizer note:
-            // Something else is modifying our pose (likely for relocalization),
-            // so we override otos pose with the new pose.
-            // This could potentially cause up to 1 loop worth of drift.
-            // I don't like this solution at all, but it preserves compatibility.
-            // The only alternative is to add getter and setters, but that breaks compat.
-            // Potential alternate solution: timestamp the pose set and backtrack it based on speed?
-            pinpoint.setPosition(pose);
-        }
-        pinpoint.update();
-        pose = pinpoint.getPositionRR();
-        lastPinpointPose = pose;
-
-
-        // RR standard
-        poseHistory.add(pose);
-        while (poseHistory.size() > 100) {
-            poseHistory.removeFirst();
-        }
-
-
-        FlightRecorder.write("ESTIMATED_POSE", new PoseMessage(pose));
-        FlightRecorder.write("PINPOINT_RAW_POSE",new FTCPoseMessage(pinpoint.getPosition()));
-        FlightRecorder.write("PINPOINT_STATUS",pinpoint.getDeviceStatus());
-
-
-        return pinpoint.getVelocityRR();
-    }
-
-
-
-
     // for debug logging
     public static final class FTCPoseMessage {
         public long timestamp;
@@ -162,8 +152,6 @@ public class PinpointDrive extends MecanumDrive {
             this.heading = pose.getHeading(AngleUnit.RADIANS);
         }
     }
-
-
 
 
 }
