@@ -1,25 +1,52 @@
 package org.firstinspires.ftc.teamcode.teleops
 
+import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.acmerobotics.roadrunner.Action
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Rotation2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive
 
+@TeleOp
 abstract class CompetitionTeleop : OpMode() {
     private lateinit var drive: PinpointDrive
     private lateinit var g1: PandaGamepad
+    private lateinit var g2: PandaGamepad
+    private lateinit var claw: Claw
     private var headingOffset: Double = 0.0
+    private val dash: FtcDashboard = FtcDashboard.getInstance()
+    private var runningActions: List<Action> = ArrayList<Action>()
 
     override fun init() {
         drive = PinpointDrive(hardwareMap, Pose2d(0.0, 0.0, 0.0))
         g1 = PandaGamepad(gamepad1)
+        g2 = PandaGamepad(gamepad2)
+        claw = Claw(hardwareMap)
     }
 
     override fun loop() {
+
+        // update running actions
+        val packet = TelemetryPacket()
+
+        val newActions: MutableList<Action> = ArrayList()
+        for (action in runningActions) {
+            action.preview(packet.fieldOverlay())
+            if (action.run(packet)) {
+                newActions.add(action)
+            }
+        }
+        runningActions = newActions
+
+        dash.sendTelemetryPacket(packet)
+
         //update gamepad values
         g1.update()
+        g2.update()
 
         //update drive Pose
         drive.updatePoseEstimate()
@@ -43,6 +70,12 @@ abstract class CompetitionTeleop : OpMode() {
         if (g1.b.justPressed()) headingOffset = rawHeading
 
         /* driver 2 */
+        if (g2.dpadDown.justPressed()) claw.approach()
+        if (g2.dpadLeft.justPressed()) claw.close()
+        if (g2.dpadRight.justPressed()) claw.open()
+        if (g2.dpadUp.justPressed()) claw.close()
+        if (g2.leftBumper.justActive()) claw.inBox()
+
     }
 
     protected abstract val allianceColor: AllianceColor

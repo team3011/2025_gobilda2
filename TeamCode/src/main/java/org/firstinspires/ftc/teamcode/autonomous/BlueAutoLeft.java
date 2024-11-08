@@ -6,21 +6,19 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 @Autonomous
-public class BlueAutoLeft extends LinearOpMode {
+public class BlueAutoLeft  {
 
     public void runOpMode() throws InterruptedException {
-        Pose2d beginPose = new Pose2d(30.5, 66, -Math.PI/2);
+        Pose2d beginPose = new Pose2d(0, 0, 0);
         PinpointDrive drive = new PinpointDrive(hardwareMap, beginPose);
-        waitForStart();
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .strafeTo(new Vector2d(-41.5,64))
+                        .splineTo(new Vector2d(2, 30), Math.PI)
                         .build());
     }
 }
+
