@@ -85,6 +85,8 @@ class PandaGamepad(var gamepad: Gamepad) {
             update(active)
             if (!isInactive()) this.component = component
         }
+
+
     }
 
     class ButtonComponent : GamepadComponent() {

@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 class CollectionArm(hardwareMap: HardwareMap) {
     private val motor: DcMotorEx = hardwareMap.get(DcMotorEx::class.java, "collectionArmMotor")
 
-    inner class SpinUp : Action {
+    inner class Extend : Action {
         private var initialized = false
         override fun run(packet: TelemetryPacket): Boolean {
             if (!initialized) {
@@ -21,7 +21,24 @@ class CollectionArm(hardwareMap: HardwareMap) {
             return vel < 10000.0
         }
     }
-    fun spinUp(): Action {
-        return SpinUp()
+
+    inner class Retract : Action {
+        private var initialized = false
+        override fun run(packet: TelemetryPacket): Boolean {
+            if (!initialized) {
+                motor.power = -0.8 //random ahh value just flipped Extend
+                initialized = true
+            }
+            val vel = motor.velocity
+            packet.put("shooterVelocity", vel)
+            return vel < 10000.0
+        }
+    }
+    fun extend(): Action {
+        return Extend()
+    }
+
+    fun retract(): Action {
+        return Retract()
     }
 }

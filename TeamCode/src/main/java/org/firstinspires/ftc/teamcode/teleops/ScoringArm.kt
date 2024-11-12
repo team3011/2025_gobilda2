@@ -4,9 +4,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Action
 import com.acmerobotics.roadrunner.clamp
 import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
-import kotlin.math.min
 
 
 class ScoringArm(hardwareMap: HardwareMap) {
@@ -36,10 +34,10 @@ class ScoringArm(hardwareMap: HardwareMap) {
 
     fun score(): Action = GoToPosition(scoringPosition)
     fun collect(): Action = GoToPosition(collectionPosition)
-    fun manual(input: Double): Action {
+    /*fun manual(input: PandaGamepad.AnalogComponent): Action {
         val stepSize = 5.0
         var targetPosition = (motor.currentPosition + input * stepSize)
         targetPosition = clamp(targetPosition, minPosition.toDouble(), maxPosition.toDouble())
         return GoToPosition(targetPosition.toInt())
-    }
+    }*/
 }
