@@ -85,7 +85,7 @@ abstract class CompetitionTeleop : OpMode() {
         if (g2.a.justPressed()) scoringArm.score()
         if (g2.b.justPressed()) scoringArm.collect()
         */
-
+        if (g2.leftStickY.isActive()) scoringArm.manual(g2.leftStickY)
 
 
     }
