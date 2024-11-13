@@ -34,7 +34,7 @@ class ScoringArm(hardwareMap: HardwareMap) {
 
     fun score(): Action = GoToPosition(scoringPosition)
     fun collect(): Action = GoToPosition(collectionPosition)
-    fun manual(input: PandaGamepad.AnalogComponent): Action {
+    fun manual(input: Double): Action {
         val stepSize = 5.0
         var targetPosition = (motor.currentPosition + input * stepSize)
         targetPosition = clamp(targetPosition, minPosition.toDouble(), maxPosition.toDouble())

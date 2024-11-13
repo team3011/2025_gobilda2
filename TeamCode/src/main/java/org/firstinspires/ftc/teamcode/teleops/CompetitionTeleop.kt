@@ -21,13 +21,13 @@ abstract class CompetitionTeleop : OpMode() {
     private lateinit var scoringArm: ScoringArm
     private var headingOffset: Double = 0.0
     private val dash: FtcDashboard = FtcDashboard.getInstance()
-    private var runningActions: List<Action> = ArrayList<Action>()
+    private var runningActions: MutableList<Action> = ArrayList()
 
     override fun init() {
         drive = PinpointDrive(hardwareMap, Pose2d(0.0, 0.0, 0.0))
         g1 = PandaGamepad(gamepad1)
         g2 = PandaGamepad(gamepad2)
-        //claw = Claw(hardwareMap)
+        claw = Claw(hardwareMap)
         //collectionArm = CollectionArm(hardwareMap)
         //scoringArm = ScoringArm(hardwareMap)
 
@@ -75,17 +75,18 @@ abstract class CompetitionTeleop : OpMode() {
         if (g1.b.justPressed()) headingOffset = rawHeading
 
         /* driver 2 */
-        /*if (g2.dpadDown.justPressed()) claw.approach()
-        if (g2.dpadLeft.justPressed()) claw.close()
-        if (g2.dpadRight.justPressed()) claw.open()
-        if (g2.dpadUp.justPressed()) claw.close()
-        if (g2.leftBumper.justActive()) claw.inBox()
+        if (g2.dpadDown.justPressed()) runningActions.add(claw.approach())
+        if (g2.dpadLeft.justPressed()) runningActions.add(claw.close())
+        if (g2.dpadRight.justPressed()) runningActions.add(claw.open())
+        if (g2.dpadUp.justPressed()) runningActions.add(claw.close())
+        if (g2.leftBumper.justActive()) runningActions.add(claw.inBox())
+        /*
         if (g2.leftBumper.justPressed() && (g2.rightBumper.justPressed())) collectionArm.retract() //debug
         if (g2.rightBumper.justPressed()) collectionArm.extend()
         if (g2.a.justPressed()) scoringArm.score()
         if (g2.b.justPressed()) scoringArm.collect()
-        */
-        if (g2.leftStickY.isActive()) scoringArm.manual(g2.leftStickY)
+
+        if (g2.leftStickY.isActive()) scoringArm.manual(g2.leftStickY)*/
 
 
     }
