@@ -28,8 +28,8 @@ class Claw (hardwareMap: HardwareMap) {
         }
     }
 
-    fun close(): Action = SetPosition(1.0, 0.46, 0.54)
-    fun open(): Action = SetPosition(1.0, 0.6, 0.4)
+    fun close(): Action = SetPosition(1.0, 0.46, 0.7)
+    fun open(): Action = SetPosition(1.0, 0.6, 0.53)
     fun inBox(): Action = SetPosition(1.0, 1.0, 0.0)
-    fun approach(): Action = SetPosition(1.0, 0.675, 0.325)
+    fun approach(): Action = SetPosition(1.0, 0.675, 0.45)
 }

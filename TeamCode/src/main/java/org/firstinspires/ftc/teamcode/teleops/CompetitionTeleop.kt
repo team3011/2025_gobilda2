@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Rotation2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive.TurnAction
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive
 
 @TeleOp
@@ -64,15 +65,22 @@ abstract class CompetitionTeleop : OpMode() {
             -gamepad1.left_stick_y.toDouble(),
             -gamepad1.left_stick_x.toDouble()
         )
-
-        drive.setDrivePowers(
-            PoseVelocity2d(
-                heading.inverse().times(input),
-                ((gamepad1.left_trigger - gamepad1.right_trigger) * 1 / 2).toDouble()
+        if (g1.rightBumper.isInactive() and g1.leftBumper.isInactive()) //don't set drive if bumpers
+            drive.setDrivePowers(
+                PoseVelocity2d(
+                    heading.inverse().times(input),
+                    ((gamepad1.left_trigger - gamepad1.right_trigger) * 1 / 2).toDouble()
+                )
             )
-        )
 
         if (g1.b.justPressed()) headingOffset = rawHeading
+
+        if (g1.leftBumper.justPressed()) {
+            //Turn left to the nearest 90 degree increment
+        }
+        if (g1.rightBumper.justPressed()){
+            //Turn right to the nearest 90 degree increment
+        }
 
         /* driver 2 */
         if (g2.dpadDown.justPressed()) runningActions.add(claw.approach())
