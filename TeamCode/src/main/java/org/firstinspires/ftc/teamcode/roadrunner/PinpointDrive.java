@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -25,6 +26,7 @@ public class PinpointDrive extends MecanumDrive {
     public static Params PARAMS = new Params();
     public GoBildaPinpointDriverRR pinpoint;
     private Pose2d lastPinpointPose = pose;
+    private double headingToMaintain = 0;
     public PinpointDrive(HardwareMap hardwareMap, Pose2d pose) {
         super(hardwareMap, pose);
         FlightRecorder.write("PINPOINT_PARAMS", PARAMS);
@@ -100,6 +102,11 @@ public class PinpointDrive extends MecanumDrive {
     }
 
     public static class Params {
+        //limits how fast human can rotate robot, decrease to slow down rotation
+        public double rotation_multi = 0.5;
+        //acceptable angle tolerance in radians
+        public double ANGULAR_TOLERANCE = Math.PI/90;
+
         /*
         Set the odometry pod positions relative to the point that the odometry computer tracks around.
         The X pod offset refers to how far sideways from the tracking point the
@@ -153,5 +160,100 @@ public class PinpointDrive extends MecanumDrive {
         }
     }
 
+    //***************************************************
+    //pulled from 2024 drive code to integrate Pinpoint
+    //***************************************************
+
+    //returns the current heading of the robot in RAD
+    public double calcYaw(Telemetry db) {
+        pinpoint.update(GoBildaPinpointDriver.readData.ONLY_UPDATE_HEADING);
+        return Math.round(pinpoint.getHeading()*10)/10.0;
+    }
+
+    //determines the shortest path to desired angle
+    public double figureOutWhatIsShorter(double reading) {
+        double result;
+        double oppositeButEqualReading;
+
+        if (reading > 0) {
+            oppositeButEqualReading = reading - 360;
+        } else {
+            oppositeButEqualReading = reading + 360;
+        }
+
+        double normalReadingDifference = Math.abs(this.headingToMaintain - reading);
+        double oppositeReadingDifference = Math.abs(this.headingToMaintain - oppositeButEqualReading);
+        boolean isOppositeReadingShorter =
+                normalReadingDifference > oppositeReadingDifference;
+
+        if (isOppositeReadingShorter) {
+            result = this.headingToMaintain - oppositeButEqualReading;
+        } else {
+            result = this.headingToMaintain - reading;
+        }
+        return -result;
+    }
+
+    //return a value that is below or equal to the limit
+    private double limiter(double input, double lim) {
+        //this will limit the pid to a range of -1 to 1
+        if (input > lim) {
+            input = lim;
+        } else if (input < -lim) {
+            input = -lim;
+        }
+        return input;
+    }
+
+
+    //code taken from https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
+    public void drive(double leftStickX, double leftStickY, double rightStickX, boolean fromAuto, Telemetry db) {
+        double x = leftStickX;
+        double y = leftStickY; // Counteract imperfect strafing
+        double rx = rightStickX * PARAMS.rotation_multi; //what way we want to rotate
+        double robotHeadingRAD = calcYaw(db);
+        double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);
+
+        if(rx == 0){
+            //we're trying to maintain our current heading
+            //calc the shortest deviation to target heading in radians
+            double shorter = this.figureOutWhatIsShorter(robotHeadingDEG);
+            //check if we are within tolerance
+            boolean isWithinAngularTolerance =
+                    Math.abs(shorter) < PARAMS.ANGULAR_TOLERANCE;
+
+            //we turn if we're not within a tolerance
+            if(!isWithinAngularTolerance){
+                double rotSpeed = Math.abs(shorter);
+                if (rotSpeed > 20) {
+                    rotSpeed = 0.70;
+                } else {
+                    rotSpeed = rotSpeed*rotSpeed/800.0;
+                }
+                rx = limiter(shorter, rotSpeed);
+            }
+        }else{
+            //we're going to maintain our new heading once we've stopped turning.
+            //not before we've turned
+            this.headingToMaintain = robotHeadingDEG;
+        }
+        //triangle """magic"""
+        double rotX = x * Math.cos(-robotHeadingRAD) + y * Math.sin(-robotHeadingRAD);
+        double rotY = x * Math.sin(-robotHeadingRAD) - y * Math.cos(-robotHeadingRAD);
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio, but only when
+        // at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(rotX) + Math.abs(rotY) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx)  / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx)   / denominator;
+        double backRightPower = (rotY + rotX - rx)  / denominator;
+
+        leftFront.setPower(frontLeftPower);
+        rightFront.setPower(frontRightPower);
+        leftBack.setPower(backLeftPower);
+        rightBack.setPower(backRightPower);
+    }
 
 }
