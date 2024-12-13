@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
@@ -23,6 +24,9 @@ public class Subsystem_Test2 extends OpMode {
     VerticalSliders verticalSliders;
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
+    ElapsedTime runtime = new ElapsedTime();
+    public static int verticalSetPosition = 1000;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -34,6 +38,7 @@ public class Subsystem_Test2 extends OpMode {
 
         this.verticalSliders = new VerticalSliders(hardwareMap);
         this.g1 = new GamepadEx(gamepad1);
+
 
         // Tell the driver that initialization is complete.
         dashboardTelemetry.addData("Status", "Initialized");
@@ -69,11 +74,13 @@ public class Subsystem_Test2 extends OpMode {
         this.left_t = -zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));
         this.right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
 
-        this.verticalSliders.manualPower(this.left_y);
+        if (this.g1.isDown(GamepadKeys.Button.A)){
+            this.verticalSliders.setPosition(0);
+        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
+            this.verticalSliders.setPosition(verticalSetPosition);
+        }
 
-        this.dashboardTelemetry.addData("left Y", this.left_y);
-        this.dashboardTelemetry.addData("vertRight", this.verticalSliders.getCurrent(1));
-        this.dashboardTelemetry.addData("vertPosition", this.verticalSliders.getHeight());
+        this.verticalSliders.update(1,this.dashboardTelemetry,this.runtime);
         this.dashboardTelemetry.update();
     }
 
