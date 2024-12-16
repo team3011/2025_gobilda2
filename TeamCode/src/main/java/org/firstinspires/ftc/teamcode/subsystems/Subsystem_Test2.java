@@ -25,7 +25,7 @@ public class Subsystem_Test2 extends OpMode {
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
     ElapsedTime runtime = new ElapsedTime();
-    public static int verticalSetPosition = 1000;
+    public static int verticalSetPosition = 400;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -75,13 +75,15 @@ public class Subsystem_Test2 extends OpMode {
         this.right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
 
         if (this.g1.isDown(GamepadKeys.Button.A)){
+
             this.verticalSliders.setPosition(0);
         } else if (this.g1.isDown(GamepadKeys.Button.Y)){
             this.verticalSliders.setPosition(verticalSetPosition);
         }
 
-        this.verticalSliders.update(1,this.dashboardTelemetry,this.runtime);
+        this.verticalSliders.update(1,this.dashboardTelemetry);
         this.dashboardTelemetry.update();
+
     }
 
     /*
@@ -89,8 +91,6 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void stop() {
-        this.verticalSliders.manualPower(0);
-        dashboardTelemetry.addData("motor0 power", 0);
         dashboardTelemetry.update();
     }
 
