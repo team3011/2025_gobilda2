@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -27,11 +29,7 @@ public class VerticalSliders {
     public static double kG = 0.015;
     public static float convertTicksToMillimeters = .225f; // 225mm/1000ticks = .225
     private boolean resetFlag = false;
-    private double lastTimeWeCheck = 0;
-    public static int minimumEncoderMovement = 10;
-    public static int howOftenWeCheck = 500; //ms
     public static int maximumMilliamps = 1000;
-    private boolean softLimitEngaged = false;
     public static double maxPower = .4;
     public static double minimumSpeed = 0.1;
     private boolean goingUp = false;
@@ -39,7 +37,7 @@ public class VerticalSliders {
     private int targetPositionMM;
 
 
-    public VerticalSliders(HardwareMap hardwareMap){
+    public VerticalSliders(@NonNull HardwareMap hardwareMap){
         this.rightMotor = hardwareMap.get(DcMotorEx.class,"vertiRight");
         this.rightMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -97,7 +95,6 @@ public class VerticalSliders {
             // ^ for my sanity
             float notInteger = mm / convertTicksToMillimeters;
             mm = Math.round(notInteger);
-            this.softLimitEngaged = false;
             this.targetPosition = mm;
         }
     }
@@ -166,8 +163,4 @@ public class VerticalSliders {
         }
         return input;
     }
-
-
-
-
 }
