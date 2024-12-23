@@ -22,10 +22,13 @@ public class Subsystem_Test2 extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     VerticalSliders verticalSliders;
+    HorizontalSliders horizontalSliders;
+    VerticalFlipper verticalFlipper;
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
     ElapsedTime runtime = new ElapsedTime();
-    public static int verticalSetPosition = 400;
+    private boolean endGame = false;
+    private double testing = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -37,6 +40,9 @@ public class Subsystem_Test2 extends OpMode {
         // step (using the FTC Robot Controller app on the phone).
 
         this.verticalSliders = new VerticalSliders(hardwareMap);
+        this.horizontalSliders = new HorizontalSliders(hardwareMap);
+        this.verticalFlipper = new VerticalFlipper(hardwareMap);
+
         this.g1 = new GamepadEx(gamepad1);
 
 
@@ -74,14 +80,58 @@ public class Subsystem_Test2 extends OpMode {
         this.left_t = -zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));
         this.right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
 
+
+
+        /*
+        //for testing vertical sliders with a set point
         if (this.g1.isDown(GamepadKeys.Button.A)){
 
             this.verticalSliders.setPosition(0);
         } else if (this.g1.isDown(GamepadKeys.Button.Y)){
             this.verticalSliders.setPosition(verticalSetPosition);
         }
+         */
 
-        this.verticalSliders.update(1,this.dashboardTelemetry);
+        /*
+        //for testing horizontal sliders with a set point
+        if (this.g1.isDown(GamepadKeys.Button.A)){
+            this.horizontalSliders.setPosition(0);
+        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
+            this.horizontalSliders.setPosition(horizontalSetPosition);
+        }
+         */
+
+
+        /*
+        //this is testing the climb
+        this.dashboardTelemetry.addData("left_y",left_y);
+        if (Math.abs(left_y) > .25) {
+            endGame = true;
+            this.verticalSliders.manualInput(left_y);
+        }
+        if (endGame && Math.abs(left_y) < .25) {
+            this.verticalSliders.manualInput(.58);
+        }
+         */
+
+        //this is to test vflippy
+
+        if (this.g1.isDown(GamepadKeys.Button.A)){
+            this.verticalFlipper.goToPickUp();
+        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
+            this.verticalFlipper.goToDropOff();
+        }
+
+
+
+
+
+
+        //this.horizontalSliders.update(1,this.dashboardTelemetry);
+        //this.dashboardTelemetry.addData("hor position", this.horizontalSliders.getPositionMM());
+
+
+        //this.verticalSliders.update(1,this.dashboardTelemetry);
         this.dashboardTelemetry.update();
 
     }
