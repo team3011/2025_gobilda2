@@ -24,6 +24,7 @@ public class Subsystem_Test2 extends OpMode {
     VerticalSliders verticalSliders;
     HorizontalSliders horizontalSliders;
     VerticalFlipper verticalFlipper;
+    VerticalGripper verticalGripper;
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
     ElapsedTime runtime = new ElapsedTime();
@@ -42,6 +43,7 @@ public class Subsystem_Test2 extends OpMode {
         this.verticalSliders = new VerticalSliders(hardwareMap);
         this.horizontalSliders = new HorizontalSliders(hardwareMap);
         this.verticalFlipper = new VerticalFlipper(hardwareMap);
+        this.verticalGripper = new VerticalGripper(hardwareMap);
 
         this.g1 = new GamepadEx(gamepad1);
 
@@ -102,26 +104,33 @@ public class Subsystem_Test2 extends OpMode {
          */
 
 
-        /*
+
         //this is testing the climb
         this.dashboardTelemetry.addData("left_y",left_y);
-        if (Math.abs(left_y) > .25) {
-            endGame = true;
+        //if (Math.abs(left_y) > .25) {
+        //    endGame = true;
             this.verticalSliders.manualInput(left_y);
-        }
-        if (endGame && Math.abs(left_y) < .25) {
-            this.verticalSliders.manualInput(.58);
-        }
-         */
+        //}
+        //if (endGame && Math.abs(left_y) < .25) {
+        //    this.verticalSliders.manualInput(.58);
+        //}
+
+
+
 
         //this is to test vflippy
-
-        if (this.g1.isDown(GamepadKeys.Button.A)){
+        if (this.g1.isDown(GamepadKeys.Button.B)){
             this.verticalFlipper.goToPickUp();
-        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
+        } else if (this.g1.isDown(GamepadKeys.Button.X)){
             this.verticalFlipper.goToDropOff();
         }
 
+        //this is to test vgrippy
+        if (this.g1.isDown(GamepadKeys.Button.A)){
+            this.verticalGripper.goToHold();
+        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
+            this.verticalGripper.goToRelease();
+        }
 
 
 

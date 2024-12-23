@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class VerticalFlipper {
@@ -16,12 +15,7 @@ public class VerticalFlipper {
     private double min = -135;
     private double max = 135;
     public static double pickupPos = 90;
-    public static double dropOffPos = -90;
-    //private double target;
-    //private double currentPos;
-    //private int time;
-    //private ElapsedTime timer = new ElapsedTime();
-    //private double moveIncrement;
+    public static double dropOffPos = -80;
 
     public VerticalFlipper(@NonNull HardwareMap hardwareMap){
         this.left = hardwareMap.get(ServoImplEx.class,"vflipleft");
@@ -44,12 +38,9 @@ public class VerticalFlipper {
         this.left.setPosition(input);
         this.right.setPosition(input);
         return input;
-        //this.currentPos = input;
-        //this.target = input;
     }
 
-    private double map(double x, double in_min, double in_max, double out_min, double out_max)
-    {
+    private double map(double x, double in_min, double in_max, double out_min, double out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 }
