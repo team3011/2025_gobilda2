@@ -10,21 +10,22 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 
-@TeleOp(name = "Subsystem_Test2")
+@TeleOp(name = "Subsystem_Test3")
 @Config
-public class Subsystem_Test2 extends OpMode {
+public class Subsystem_Test3 extends OpMode {
     //this section allows us to access telemetry data from a browser
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    public static VerticalSliders verticalSliders;
-    public static HorizontalSliders horizontalSliders;
-    //public static VerticalFlipper verticalFlipper;
-    //public static VerticalGripper verticalGripper;
+
 
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
@@ -33,25 +34,21 @@ public class Subsystem_Test2 extends OpMode {
     public static double dTesting = 0;
     public static int iTesting = 200;
 
+    DcMotorEx test1, test2, test3, test4;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-
-        verticalSliders = new VerticalSliders(hardwareMap);
-        horizontalSliders = new HorizontalSliders(hardwareMap);
-        //verticalFlipper = new VerticalFlipper(hardwareMap);
-        //verticalGripper = new VerticalGripper(hardwareMap);
-
-
         this.g1 = new GamepadEx(gamepad1);
+        test1 = hardwareMap.get(DcMotorEx.class, "rightFront");
+        test2 = hardwareMap.get(DcMotorEx.class, "rightBack");
+        test3 = hardwareMap.get(DcMotorEx.class, "leftFront");
+        test4 = hardwareMap.get(DcMotorEx.class, "leftBack");
+        test3.setDirection(DcMotorSimple.Direction.REVERSE);
+        test4.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
-        // Tell the driver that initialization is complete.
         dashboardTelemetry.addData("Status", "Initialized");
         dashboardTelemetry.update();
     }
@@ -68,6 +65,8 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void start() {
+        //test1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //test2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
@@ -85,30 +84,30 @@ public class Subsystem_Test2 extends OpMode {
         this.left_t = -zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));
         this.right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
 
+        test1.setVelocity(dTesting,AngleUnit.DEGREES);
+        //test1.setPower(dTesting);
+        dashboardTelemetry.addData("motor1 velocity",test1.getVelocity(AngleUnit.DEGREES));
+        dashboardTelemetry.addData("motor1 power", test1.getPower());
 
+        test2.setVelocity(dTesting,AngleUnit.DEGREES);
+        //test2.setPower(dTesting);
+        dashboardTelemetry.addData("motor2 velocity",test2.getVelocity(AngleUnit.DEGREES));
+        dashboardTelemetry.addData("motor2 power", test2.getPower());
 
+        test3.setVelocity(dTesting,AngleUnit.DEGREES);
+        //test2.setPower(dTesting);
+        dashboardTelemetry.addData("motor3 velocity",test3.getVelocity(AngleUnit.DEGREES));
+        dashboardTelemetry.addData("motor3 power", test3.getPower());
 
-        //for testing vertical sliders with a set point
-        if (this.g1.isDown(GamepadKeys.Button.A)){
-            verticalSliders.setPosition(0);
-        } else if (this.g1.isDown(GamepadKeys.Button.Y)){
-            verticalSliders.setPosition(iTesting);
-        }
-        verticalSliders.update(1,this.dashboardTelemetry);
-
-        //for testing horizontal sliders with a set point
-        if (this.g1.isDown(GamepadKeys.Button.X)){
-            horizontalSliders.setPosition(0);
-        } else if (this.g1.isDown(GamepadKeys.Button.B)) {
-            horizontalSliders.setPosition(iTesting);
-        }
-        horizontalSliders.update(1,this.dashboardTelemetry);
-
-
+        test4.setVelocity(dTesting,AngleUnit.DEGREES);
+        //test2.setPower(dTesting);
+        dashboardTelemetry.addData("motor4 velocity",test4.getVelocity(AngleUnit.DEGREES));
+        dashboardTelemetry.addData("motor4 power", test4.getPower());
 
 
 
         this.dashboardTelemetry.update();
+
     }
 
     /*
