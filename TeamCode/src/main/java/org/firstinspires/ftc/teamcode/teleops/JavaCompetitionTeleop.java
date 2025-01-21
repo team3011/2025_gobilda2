@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Rotation2d;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 
 /** @noinspection unused*/
 @TeleOp
+@Config
 public abstract class JavaCompetitionTeleop extends OpMode {
     protected AllianceColor allianceColor;
     PinpointDrive drive;
@@ -24,6 +26,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     //this section allows us to access telemetry data from a browser
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
 
     public void init() {
         drive = new PinpointDrive(hardwareMap, new Pose2d(0, 0, 0));
@@ -45,11 +48,15 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
 
 
-        dashboardTelemetry.addData("y",digitalTransmission(-left_y));
+        dashboardTelemetry.addData("y",left_y);
+        dashboardTelemetry.addData("x",left_x);
+        dashboardTelemetry.addData("dTy",digitalTransmission(left_y));
+        dashboardTelemetry.addData("dTx",digitalTransmission(left_x));
         //driver 1
         dashboardTelemetry.addData("color", allianceColor.toString());
         if (allianceColor.equals(AllianceColor.BLUE)) {
-            drive.drive(digitalTransmission(left_x), digitalTransmission(-left_y), right_x, false, dashboardTelemetry);
+            //drive.drive(digitalTransmission(-left_x), digitalTransmission(left_y), right_x, false, dashboardTelemetry);
+            drive.drive2(digitalTransmission(left_x),digitalTransmission(left_y),right_x, dashboardTelemetry);
         }
 
         //this modifies the field centric direction

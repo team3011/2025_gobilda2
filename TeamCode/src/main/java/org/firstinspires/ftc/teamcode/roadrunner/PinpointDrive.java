@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.roadrunner;
 
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.PoseMessage;
+import org.firstinspires.ftc.teamcode.teleops.JavaCompetitionTeleop;
 
 
 /**
@@ -22,7 +24,14 @@ import org.firstinspires.ftc.teamcode.roadrunner.messages.PoseMessage;
  * Portions of this code made and released under the MIT License by Gobilda (Base 10 Assets, LLC)
  * Unless otherwise noted, comments are from Gobilda
  */
+@Config
 public class PinpointDrive extends MecanumDrive {
+    public static double correctionMultiplier = 1;
+    public static double ANGULAR_TOLERANCE_DEGREES = 2;
+    public static double rotMulti = 1.1;
+
+
+
     public static Params PARAMS = new Params();
     public GoBildaPinpointDriverRR pinpoint;
     private Pose2d lastPinpointPose = pose;
@@ -102,6 +111,7 @@ public class PinpointDrive extends MecanumDrive {
     }
 
     public static class Params {
+
         //limits how fast human can rotate robot, decrease to slow down rotation
         public double rotation_multi = 0.5;
         //acceptable angle tolerance in radians
@@ -170,7 +180,7 @@ public class PinpointDrive extends MecanumDrive {
         return Math.round(pinpoint.getHeading()*10)/10.0;
     }
 
-    //determines the shortest path to desired angle
+    //determines the shortest path to desired angle in degrees
     public double figureOutWhatIsShorter(double reading) {
         double result;
         double oppositeButEqualReading;
@@ -205,6 +215,77 @@ public class PinpointDrive extends MecanumDrive {
         return input;
     }
 
+    public void drive2(double x, double y, double rx, Telemetry db){
+        double robotHeadingRAD = calcYaw(db);
+        double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);
+        db.addData("yaw rads",robotHeadingRAD);
+
+        if(rx == 0){
+            //we're trying to maintain our current heading
+            //calc the shortest deviation to target heading in degrees
+            double shorter = this.figureOutWhatIsShorter(robotHeadingDEG);
+            db.addData("shorter",shorter);
+            //check if we are within tolerance
+            boolean isWithinAngularTolerance =
+                    Math.abs(shorter) < ANGULAR_TOLERANCE_DEGREES;
+
+            //we turn if we're not within a tolerance
+            if(!isWithinAngularTolerance){
+                //this means we are moving
+                if (Math.abs(y) > 0 || Math.abs(x) > 0) {
+                    double rotSpeed = Math.abs(shorter);
+                    if (rotSpeed > 20) {
+                        rotSpeed = 0.70;
+                    } else {
+                        rotSpeed = correctionMultiplier * rotSpeed * rotSpeed / 800.0;
+                    }
+                    rx = limiter(shorter, rotSpeed);
+                } else {
+                    //this means we are not moving but not pointing in the right direction
+                    double rotSpeed = Math.abs(shorter);
+                    if (rotSpeed > 20) {
+                        rotSpeed = 0.70;
+                    } else {
+                        rotSpeed = 2 * correctionMultiplier * rotSpeed * rotSpeed / 800.0;
+                    }
+                    rx = limiter(shorter, rotSpeed);
+                }
+            }
+        }else{
+            //we're going to maintain our new heading once we've stopped turning.
+            //not before we've turned
+            this.headingToMaintain = robotHeadingDEG;
+        }
+        //triangle """magic"""
+        double rotX = x * Math.cos(-robotHeadingRAD) - y * Math.sin(-robotHeadingRAD);
+        double rotY = x * Math.sin(-robotHeadingRAD) + y * Math.cos(-robotHeadingRAD);
+        rotX = rotX * rotMulti;
+
+        //double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        //double frontLeftPower = (y+x+rx) / denominator;
+        //double backLeftPower = (y - x + rx) / denominator;
+        //double frontRightPower = (y-x-rx) / denominator;
+        //double backRightPower = (y + x - rx) / denominator;
+
+        double denominator = Math.max(Math.abs(rotX) + Math.abs(rotY) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx)  / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx)   / denominator;
+        double backRightPower = (rotY + rotX - rx)  / denominator;
+
+        leftBack.setPower(backLeftPower);
+        rightBack.setPower(backRightPower);
+        leftFront.setPower(frontLeftPower);
+        rightFront.setPower(frontRightPower);
+
+        db.addData("rx",rx);
+        db.addData("fLP",frontLeftPower);
+        db.addData("fRP",frontRightPower);
+        db.addData("rLP",backLeftPower);
+        db.addData("rRP",backRightPower);
+
+
+    }
 
     //code taken from https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
     public void drive(double leftStickX, double leftStickY, double rightStickX, boolean fromAuto, Telemetry db) {
@@ -214,23 +295,37 @@ public class PinpointDrive extends MecanumDrive {
         double robotHeadingRAD = calcYaw(db);
         double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);
 
+
         if(rx == 0){
             //we're trying to maintain our current heading
-            //calc the shortest deviation to target heading in radians
+            //calc the shortest deviation to target heading in degrees
             double shorter = this.figureOutWhatIsShorter(robotHeadingDEG);
+            db.addData("shorter",shorter);
             //check if we are within tolerance
             boolean isWithinAngularTolerance =
-                    Math.abs(shorter) < PARAMS.ANGULAR_TOLERANCE;
+                    Math.abs(shorter) < ANGULAR_TOLERANCE_DEGREES;
 
             //we turn if we're not within a tolerance
             if(!isWithinAngularTolerance){
-                double rotSpeed = Math.abs(shorter);
-                if (rotSpeed > 20) {
-                    rotSpeed = 0.70;
+                //this means we are moving
+                if (Math.abs(y) > 0 || Math.abs(x) > 0) {
+                    double rotSpeed = Math.abs(shorter);
+                    if (rotSpeed > 20) {
+                        rotSpeed = 0.70;
+                    } else {
+                        rotSpeed = correctionMultiplier * rotSpeed * rotSpeed / 800.0;
+                    }
+                    rx = limiter(shorter, rotSpeed);
                 } else {
-                    rotSpeed = rotSpeed*rotSpeed/800.0;
+                    //this means we are not moving but not pointing in the right direction
+                    double rotSpeed = Math.abs(shorter);
+                    if (rotSpeed > 20) {
+                        rotSpeed = 0.70;
+                    } else {
+                        rotSpeed = 2 * correctionMultiplier * rotSpeed * rotSpeed / 800.0;
+                    }
+                    rx = limiter(shorter, rotSpeed);
                 }
-                rx = limiter(shorter, rotSpeed);
             }
         }else{
             //we're going to maintain our new heading once we've stopped turning.
@@ -241,6 +336,7 @@ public class PinpointDrive extends MecanumDrive {
         double rotX = x * Math.cos(-robotHeadingRAD) + y * Math.sin(-robotHeadingRAD);
         double rotY = x * Math.sin(-robotHeadingRAD) - y * Math.cos(-robotHeadingRAD);
 
+
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
         // at least one is out of the range [-1, 1]
@@ -250,10 +346,31 @@ public class PinpointDrive extends MecanumDrive {
         double backLeftPower = (rotY - rotX + rx)   / denominator;
         double backRightPower = (rotY + rotX - rx)  / denominator;
 
-        leftFront.setPower(frontLeftPower);
-        rightFront.setPower(frontRightPower);
-        leftBack.setPower(backLeftPower);
-        rightBack.setPower(backRightPower);
+        db.addData("rx",rx);
+        db.addData("fL",frontLeftPower);
+        db.addData("fR",frontRightPower);
+        db.addData("rL",backLeftPower);
+        db.addData("rR",backRightPower);
+
+        //leftFront.setPower(frontLeftPower);
+        //rightFront.setPower(frontRightPower);
+        //leftBack.setPower(backLeftPower);
+        //rightBack.setPower(backRightPower);
+
+        double fL_velocity = map(frontLeftPower,-1,1,-340, 340);
+        double fR_velocity = map(frontRightPower,-1,1,-340, 340);
+        double rL_velocity = map(backLeftPower,-1,1,-340, 340);
+        double rR_velocity = map(backRightPower,-1,1,-340, 340);
+
+        leftFront.setVelocity(fL_velocity,AngleUnit.DEGREES);
+        rightFront.setVelocity(fR_velocity,AngleUnit.DEGREES);
+        leftBack.setVelocity(rL_velocity,AngleUnit.DEGREES);
+        rightBack.setVelocity(rR_velocity,AngleUnit.DEGREES);
+
+    }
+
+    private double map(double x, double in_min, double in_max, double out_min, double out_max) {
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
 }

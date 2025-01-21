@@ -29,8 +29,8 @@ public class VerticalSliders {
     public static double kG = 0.015;
     public static float convertTicksToMillimeters = .225f; // 225mm/1000ticks = .225
     private boolean resetFlag = false;
-    public static int maximumMilliamps = 1000;
-    public static double maxPower = .4;
+    public static int maximumMilliamps = 1500;
+    public static double maxPower = 1;
     public static double minimumSpeed = 0.1;
     private boolean goingUp = false;
     private boolean holdingPosition = true;
@@ -42,10 +42,11 @@ public class VerticalSliders {
         this.rightMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.leftMotor = hardwareMap.get(DcMotorEx.class,"vertiLeft");
         this.leftMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        this.leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         this.controller = new PIDController(this.kP, this.kI, this.kD);
     }
@@ -104,7 +105,7 @@ public class VerticalSliders {
         }
     }
 
-    public void update(double lim, Telemetry dashboardTelemetry){
+    public void update(Telemetry dashboardTelemetry){
         if (!this.holdingPosition) {
             double pid = 0;
             //get the current position of the sliders
@@ -134,25 +135,22 @@ public class VerticalSliders {
                     this.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     this.targetPosition = 0;
                 } else {
-                    pid = -0.2;
+                    pid = -0.4;
                 }
             }
 
             this.rightMotor.setPower(pid);
             this.leftMotor.setPower(pid);
 
-            dashboardTelemetry.addData("current position in ticks", currentPosition);
-            dashboardTelemetry.addData("pid output", pid);
+//            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
+//            dashboardTelemetry.addData("vert-pid output", pid);
         }
 
-        dashboardTelemetry.addData("reset Flag", resetFlag);
-        dashboardTelemetry.addData("going up", goingUp);
-        dashboardTelemetry.addData("milliamps", this.getCurrent(1));
-        dashboardTelemetry.addData("holding pos", this.holdingPosition);
-        dashboardTelemetry.addData("target position in ticks", this.targetPosition);
-
-
-        dashboardTelemetry.update();
+//        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
+//        dashboardTelemetry.addData("vert-going up", goingUp);
+//        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
+//        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
+//        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
     }
 
     /**
