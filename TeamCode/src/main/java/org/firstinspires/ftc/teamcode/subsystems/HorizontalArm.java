@@ -17,7 +17,6 @@ public class HorizontalArm {
     public static int timeTransferToScan = 500;
     public static int timeScantoPickup = 500;
     public static int timeTransferToStow = 125;
-    public static int timeClaw = 2000;
 
 
     private Servo leftElbow;

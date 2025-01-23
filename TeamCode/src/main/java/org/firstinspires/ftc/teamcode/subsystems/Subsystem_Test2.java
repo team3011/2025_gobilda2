@@ -21,7 +21,6 @@ public class Subsystem_Test2 extends OpMode {
     //this section allows us to access telemetry data from a browser
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    //public static HorizontalSliders horizontalSliders;
     public static VerticalSystem verticalSystem;
     public static HorizontalArm horizontalArm;
     public static HorizontalHand horizontalHand;
@@ -34,7 +33,6 @@ public class Subsystem_Test2 extends OpMode {
     ElapsedTime transferTimer = new ElapsedTime();
     boolean transferTriggered = false;
     public static int transferPause = 1000;
-    boolean readyToDrop = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
