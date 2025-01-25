@@ -15,18 +15,17 @@ public class HorizontalArm {
     public static double stowPos= 0.5;
     public static int timePickupToTransfer = 1000;
     public static int timeTransferToScan = 500;
-    public static int timeScantoPickup = 500;
+    public static int timeScanToPickup = 500;
     public static int timeTransferToStow = 125;
 
 
-    private Servo leftElbow;
-    private Servo rightElbow;
+    private final Servo leftElbow;
+    private final Servo rightElbow;
 
     private double target;
     private double currentPos;
     private int time;
-    private ElapsedTime timer = new ElapsedTime();
-    private ElapsedTime timer2= new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
     private double moveIncrement;
 
 
@@ -34,6 +33,7 @@ public class HorizontalArm {
         leftElbow = hardwareMap.get(Servo.class, "leftArm");
         rightElbow = hardwareMap.get(Servo.class, "rightArm");
         rightElbow.setDirection(Servo.Direction.REVERSE);
+        currentPos = leftElbow.getPosition();
     }
 
     public void toScanPos(){
@@ -44,7 +44,7 @@ public class HorizontalArm {
 
     public void toPickupPos(){
         if (currentPos == scanPos) {
-            setTarget(pickupPos, timeScantoPickup);
+            setTarget(pickupPos, timeScanToPickup);
         }
     }
 
@@ -62,7 +62,7 @@ public class HorizontalArm {
     }
 
     public void goToStartPos(){
-        setPosition(transferPos);
+        setTarget(transferPos, timePickupToTransfer);
     }
 
     public void setPosition(double input){

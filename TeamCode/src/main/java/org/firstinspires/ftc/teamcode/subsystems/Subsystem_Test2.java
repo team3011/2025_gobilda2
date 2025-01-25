@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,6 +34,7 @@ public class Subsystem_Test2 extends OpMode {
     ElapsedTime transferTimer = new ElapsedTime();
     boolean transferTriggered = false;
     public static int transferPause = 1000;
+    RevBlinkinLedDriver blinkin;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -45,9 +47,11 @@ public class Subsystem_Test2 extends OpMode {
         verticalSystem = new VerticalSystem(hardwareMap, dashboardTelemetry);
         horizontalArm = new HorizontalArm(hardwareMap);
         horizontalHand = new HorizontalHand(hardwareMap);
+        blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinken");
         //horizontalSliders = new HorizontalSliders(hardwareMap);
         this.g1 = new GamepadEx(gamepad1);
-
+        blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        horizontalArm.goToStartPos();
 
         // Tell the driver that initialization is complete.
         dashboardTelemetry.addData("Status", "Initialized");
@@ -59,6 +63,7 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void init_loop() {
+        horizontalArm.update();
     }
 
     /*
@@ -66,7 +71,6 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void start() {
-        horizontalArm.goToStartPos();
         horizontalHand.wristTransfer();
         horizontalHand.handPar();
 
