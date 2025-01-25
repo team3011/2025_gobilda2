@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -25,16 +26,19 @@ public class Subsystem_Test2 extends OpMode {
     public static VerticalSystem verticalSystem;
     public static HorizontalArm horizontalArm;
     public static HorizontalHand horizontalHand;
+    public static HorizontalSliders horizontalSliders;
+    public static int iTesting = 100;
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
     ElapsedTime clawTimer = new ElapsedTime();
-    public static int clawPause = 1000;
+    public static int clawPause = 500;
     ElapsedTime armTimer = new ElapsedTime();
     boolean armPauseTriggered = false;
     ElapsedTime transferTimer = new ElapsedTime();
     boolean transferTriggered = false;
-    public static int transferPause = 1000;
+    public static int transferPause = 1500;
     RevBlinkinLedDriver blinkin;
+    Servo rgbLED;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -48,7 +52,8 @@ public class Subsystem_Test2 extends OpMode {
         horizontalArm = new HorizontalArm(hardwareMap);
         horizontalHand = new HorizontalHand(hardwareMap);
         blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinken");
-        //horizontalSliders = new HorizontalSliders(hardwareMap);
+        rgbLED = hardwareMap.get(Servo.class,"rgbLight");
+        horizontalSliders = new HorizontalSliders(hardwareMap);
         this.g1 = new GamepadEx(gamepad1);
         blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
         horizontalArm.goToStartPos();
@@ -106,7 +111,6 @@ public class Subsystem_Test2 extends OpMode {
             horizontalHand.openClaw();
             armPauseTriggered = false;
         }
-        verticalSystem.update();
 
 
         //for testing horizontalSystem
@@ -115,13 +119,17 @@ public class Subsystem_Test2 extends OpMode {
             horizontalHand.wristPickup();
             horizontalHand.handPar();
             horizontalHand.openClaw();
+            rgbLED.setPosition(.279);
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
             horizontalArm.toScanPos();
             horizontalHand.wristPickup();
             horizontalHand.handPar();
             horizontalHand.openClaw();
-            verticalSystem.prepToTransfer();
+            verticalSystem.goHome();
+            rgbLED.setPosition(.5);
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)) {
+            rgbLED.setPosition(.611);
+            verticalSystem.prepToTransfer();
             horizontalHand.closeClaw();
             clawTimer.reset();
             while (clawTimer.milliseconds() < clawPause) {
@@ -133,16 +141,17 @@ public class Subsystem_Test2 extends OpMode {
             transferTriggered = true;
             transferTimer.reset();
             horizontalHand.handPar();
-
+            horizontalSliders.setPosition(0);
         }
 
-        if (transferTriggered && transferTimer.milliseconds() > transferPause) {
+        if (transferTriggered && transferTimer.milliseconds() > transferPause && horizontalSliders.getPositionMM() < 10) {
             transferTriggered = false;
             verticalSystem.prepToStow();
             armPauseTriggered = true;
             armTimer.reset();
         }
         horizontalArm.update();
+        verticalSystem.update();
 
 
 
@@ -156,12 +165,12 @@ public class Subsystem_Test2 extends OpMode {
 //        verticalSliders.update(1,this.dashboardTelemetry);
 
         //for testing horizontal sliders with a set point
-//        if (this.g1.isDown(GamepadKeys.Button.X)){
-//            horizontalSliders.setPosition(0);
-//        } else if (this.g1.isDown(GamepadKeys.Button.B)) {
-//            horizontalSliders.setPosition(iTesting);
-//        }
-//        horizontalSliders.update(1,this.dashboardTelemetry);
+        if (this.g1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
+            horizontalSliders.setPosition(0);
+        } else if (this.g1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            horizontalSliders.setPosition(iTesting);
+        }
+        horizontalSliders.update(1,this.dashboardTelemetry);
 
         //this is to test vflippy
 //        if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)){

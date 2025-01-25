@@ -11,13 +11,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class VerticalSystem {
     //@Config variables
-    public static int Height_transfer = 100;
+    public static int Height_transfer = 50;
     public static int Height_prepToLift = 0;
     public static int Height_basket = 900;
     public static int Height_sample = 0;
-    public static int Height_stow = 200;
-    public static int Height_flipUp = Height_basket;
-    public static int Height_flipDown = Height_basket-100;
+    public static int Height_stow = 300;
+    public static int Height_flipUp = 600;
+    public static int Height_flipDown = 575;
     public static int gripPause = 1000;
     static int flipperState = 0; //0 means facing forward, 1 means facing back
     static int flipperTarget = 0; //same data as above

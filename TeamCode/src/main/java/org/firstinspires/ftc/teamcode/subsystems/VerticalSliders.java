@@ -29,7 +29,7 @@ public class VerticalSliders {
     public static double kG = 0.015;
     public static float convertTicksToMillimeters = .225f; // 225mm/1000ticks = .225
     private boolean resetFlag = false;
-    public static int maximumMilliamps = 1500;
+    public static int maximumMilliamps = 1750;
     public static double maxPower = 1;
     public static double minimumSpeed = 0.1;
     private boolean goingUp = false;
@@ -142,15 +142,15 @@ public class VerticalSliders {
             this.rightMotor.setPower(pid);
             this.leftMotor.setPower(pid);
 
-//            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
-//            dashboardTelemetry.addData("vert-pid output", pid);
+            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
+            dashboardTelemetry.addData("vert-pid output", pid);
         }
 
-//        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
-//        dashboardTelemetry.addData("vert-going up", goingUp);
-//        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
-//        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
-//        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
+        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
+        dashboardTelemetry.addData("vert-going up", goingUp);
+        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
+        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
+        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
     }
 
     /**

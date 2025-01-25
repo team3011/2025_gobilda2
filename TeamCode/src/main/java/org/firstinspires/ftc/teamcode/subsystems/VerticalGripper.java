@@ -12,7 +12,7 @@ public class VerticalGripper {
     private ServoImplEx gripper;
     private double min = -135;
     private double max = 135;
-    public static double holdPos = -20;
+    public static double holdPos = -23;
     public static double releasePos = 20;
 
     public VerticalGripper(@NonNull HardwareMap hardwareMap){

@@ -22,8 +22,8 @@ public class HorizontalSliders {
     public static double kD = 0;
     public static float convertTicksToMillimeters = .4054f; // 225mm/1000ticks = .225
     private boolean resetFlag = false;
-    public static int maximumMilliamps = 3000;
-    public static double maxPower = .6;
+    public static int maximumMilliamps = 3500;
+    public static double maxPower = .8;
     public static double minimumSpeed = 0.1;
     private boolean goingUp = false;
     private boolean holdingPosition = true;
@@ -65,8 +65,8 @@ public class HorizontalSliders {
                 this.goingUp = false;
             }
 
-            if (mm > 450) {
-                mm = 450;
+            if (mm > 400) {
+                mm = 400;
             }
 
             this.targetPositionMM = mm;
@@ -116,7 +116,7 @@ public class HorizontalSliders {
             }
 
 
-            if (this.resetFlag && !this.goingUp && currentPosition < 200) {
+            if (this.resetFlag && !this.goingUp && currentPosition < 100) {
                 if (this.getCurrent() > maximumMilliamps){
                     this.resetFlag = false;
                     this.holdingPosition = true;
@@ -125,20 +125,20 @@ public class HorizontalSliders {
                     this.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     this.targetPosition = 0;
                 } else {
-                    pid = -0.3;
+                    pid = -0.4;
                 }
             }
 
             this.leftMotor.setPower(pid);
 
-            //dashboardTelemetry.addData("hor-current position in ticks", currentPosition);
-            //dashboardTelemetry.addData("hor-pid output", pid);
+            dashboardTelemetry.addData("hor-current position in ticks", currentPosition);
+            dashboardTelemetry.addData("hor-pid output", pid);
         }
 
-        //dashboardTelemetry.addData("hor-reset Flag", resetFlag);
-        //dashboardTelemetry.addData("hor-going out", goingUp);
-        //dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
-        //dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
-        //dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
+        dashboardTelemetry.addData("hor-reset Flag", resetFlag);
+        dashboardTelemetry.addData("hor-going out", goingUp);
+        dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
+        dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
+        dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
     }
 }
