@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,6 +40,9 @@ public class Subsystem_Test2 extends OpMode {
     public static int transferPause = 1500;
     RevBlinkinLedDriver blinkin;
     Servo rgbLED;
+    boolean isScanning = false;
+    public static MyLimeLight myLimeLight;
+    ElapsedTime scanPause = new ElapsedTime();
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -51,12 +55,14 @@ public class Subsystem_Test2 extends OpMode {
         verticalSystem = new VerticalSystem(hardwareMap, dashboardTelemetry);
         horizontalArm = new HorizontalArm(hardwareMap);
         horizontalHand = new HorizontalHand(hardwareMap);
+        myLimeLight = new MyLimeLight(hardwareMap);
         blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinken");
         rgbLED = hardwareMap.get(Servo.class,"rgbLight");
         horizontalSliders = new HorizontalSliders(hardwareMap);
         this.g1 = new GamepadEx(gamepad1);
         blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-        horizontalArm.goToStartPos();
+
+
 
         // Tell the driver that initialization is complete.
         dashboardTelemetry.addData("Status", "Initialized");
@@ -68,7 +74,7 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void init_loop() {
-        horizontalArm.update();
+
     }
 
     /*
@@ -76,8 +82,10 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void start() {
-        horizontalHand.wristTransfer();
+        horizontalArm.goToStartPos();
+        horizontalHand.wristPickup();
         horizontalHand.handPar();
+
 
     }
 
@@ -117,16 +125,20 @@ public class Subsystem_Test2 extends OpMode {
         if (this.g1.isDown(GamepadKeys.Button.DPAD_DOWN)){
             horizontalArm.toPickupPos();
             horizontalHand.wristPickup();
-            horizontalHand.handPar();
             horizontalHand.openClaw();
             rgbLED.setPosition(.279);
+            myLimeLight.stop();
+            isScanning = false;
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
+            scanPause.reset();
             horizontalArm.toScanPos();
             horizontalHand.wristPickup();
             horizontalHand.handPar();
             horizontalHand.openClaw();
             verticalSystem.goHome();
             rgbLED.setPosition(.5);
+            isScanning = true;
+            myLimeLight.start(0); //0 red, 1 blue, 2 yellow
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)) {
             rgbLED.setPosition(.611);
             verticalSystem.prepToTransfer();
@@ -150,8 +162,18 @@ public class Subsystem_Test2 extends OpMode {
             armPauseTriggered = true;
             armTimer.reset();
         }
+
+        if (isScanning && scanPause.milliseconds() > 500 && myLimeLight.update()) {
+            horizontalHand.setPositionByCamera(myLimeLight.getAngle());
+            //horizontalHand.setPosition();
+        }
+
+        dashboardTelemetry.addData("isScanning",isScanning);
+
         horizontalArm.update();
         verticalSystem.update();
+
+
 
 
 

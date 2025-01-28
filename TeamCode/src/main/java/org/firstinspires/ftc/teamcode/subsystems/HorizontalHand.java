@@ -45,4 +45,21 @@ public class HorizontalHand {
     public void wristPickup(){
         wrist.setPosition(down);
     }
+
+
+    //input will be -90 to 80 with 0 being perp
+    public void setPositionByCamera(double input){
+        //perp and par = 90
+        //.79-.46 = servo per 90
+        double servoPerDeg = 0.0036666666666667;
+        double output = perp - servoPerDeg*input;
+        if (output < .2) {
+            output = .2;
+        }
+        hand.setPosition(output);
+    }
+
+    public void setPosition(){
+        hand.setPosition(par);
+    }
 }
