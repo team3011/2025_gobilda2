@@ -28,6 +28,7 @@ public class HorizontalSliders {
     private boolean goingUp = false;
     private boolean holdingPosition = true;
     private int targetPositionMM;
+    boolean manualMove = false;
 
     public HorizontalSliders(@NonNull HardwareMap hardwareMap){
         this.leftMotor = hardwareMap.get(DcMotorEx.class, "horLeft");
@@ -39,7 +40,9 @@ public class HorizontalSliders {
     }
 
     public void manualInput(double input){
+        manualMove = true;
         this.leftMotor.setPower(input);
+        targetPositionMM = 999;
     }
 
     public int getPosition(){
@@ -51,6 +54,7 @@ public class HorizontalSliders {
     }
 
     public void setPosition(int mm){
+        manualMove = false;
         //are we trying to move?
         if (this.targetPositionMM != mm) {
             this.holdingPosition = false;
@@ -98,7 +102,7 @@ public class HorizontalSliders {
     }
 
     public void update(double lim, Telemetry dashboardTelemetry){
-        if (!this.holdingPosition) {
+        if (!this.holdingPosition && !manualMove) {
             double pid = 0;
             //get the current position of the sliders
             int currentPosition = getPosition();
@@ -131,14 +135,16 @@ public class HorizontalSliders {
 
             this.leftMotor.setPower(pid);
 
-            dashboardTelemetry.addData("hor-current position in ticks", currentPosition);
-            dashboardTelemetry.addData("hor-pid output", pid);
+            //dashboardTelemetry.addData("hor-current position in ticks", currentPosition);
+            //dashboardTelemetry.addData("hor-pid output", pid);
         }
 
-        dashboardTelemetry.addData("hor-reset Flag", resetFlag);
-        dashboardTelemetry.addData("hor-going out", goingUp);
+        dashboardTelemetry.addData("where am i?",getPositionMM());
+        dashboardTelemetry.addData("target?",targetPositionMM);
+        //dashboardTelemetry.addData("hor-reset Flag", resetFlag);
+        //dashboardTelemetry.addData("hor-going out", goingUp);
         dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
-        dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
-        dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
+        //dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
+        //dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
     }
 }

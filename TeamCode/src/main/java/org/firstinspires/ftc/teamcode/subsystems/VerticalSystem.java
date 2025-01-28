@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class VerticalSystem {
     //@Config variables
-    public static int Height_transfer = 50;
+    public static int Height_transfer = 30;
     public static int Height_prepToLift = 0;
     public static int Height_basket = 900;
     public static int Height_sample = 0;

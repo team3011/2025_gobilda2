@@ -142,15 +142,15 @@ public class VerticalSliders {
             this.rightMotor.setPower(pid);
             this.leftMotor.setPower(pid);
 
-            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
-            dashboardTelemetry.addData("vert-pid output", pid);
+//            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
+//            dashboardTelemetry.addData("vert-pid output", pid);
         }
 
-        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
-        dashboardTelemetry.addData("vert-going up", goingUp);
-        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
-        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
-        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
+//        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
+//        dashboardTelemetry.addData("vert-going up", goingUp);
+//        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
+//        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
+//        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
     }
 
     /**
