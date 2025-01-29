@@ -42,7 +42,7 @@ public class HorizontalSliders {
     public void manualInput(double input){
         manualMove = true;
         if (getPositionMM() > 400 && input > 0) {
-            this.leftMotor.setPower(input);
+            this.leftMotor.setPower(0);
         } else {
             this.leftMotor.setPower(input);
         }
