@@ -8,11 +8,20 @@ import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.subsystems.HorizontalArm;
+import org.firstinspires.ftc.teamcode.subsystems.HorizontalHand;
+import org.firstinspires.ftc.teamcode.subsystems.HorizontalSliders;
+import org.firstinspires.ftc.teamcode.subsystems.MyLimeLight;
+import org.firstinspires.ftc.teamcode.subsystems.VerticalSystem;
 
 /** @noinspection unused*/
 @TeleOp
@@ -27,11 +36,56 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
+    //***********************************
+    //copied from subsystem test 2 01/29
+    //***********************************
+    public static VerticalSystem verticalSystem;
+    public static HorizontalArm horizontalArm;
+    public static HorizontalHand horizontalHand;
+    public static HorizontalSliders horizontalSliders;
+    ElapsedTime clawTimer = new ElapsedTime();
+    public static int clawPause = 500;
+    ElapsedTime armTimer = new ElapsedTime();
+    boolean armPauseTriggered = false;
+    ElapsedTime transferTimer = new ElapsedTime();
+    boolean transferTriggered = false;
+    public static int transferPause = 1500;
+    RevBlinkinLedDriver blinkin;
+    Servo rgbLED;
+    boolean isScanning = false;
+    public static MyLimeLight myLimeLight;
+    ElapsedTime scanPause = new ElapsedTime();
+    public static double scanPowerFast = .6;
+    public static double scanPowerSlow = .3;
+    public static int pickUpPause = 650;
+    boolean isPickupPause = false;
+    ElapsedTime pickUpPauseTimer = new ElapsedTime();
+    DcMotor headlights;
+    //********************************
+
 
     public void init() {
         drive = new PinpointDrive(hardwareMap, new Pose2d(0, 0, 0));
         g1 = new GamepadEx(gamepad1);
         allianceColor = getAllianceColor();
+
+        //***********************************
+        //copied from subsystem test 2 01/29
+        headlights = hardwareMap.get(DcMotor.class, "led");
+        verticalSystem = new VerticalSystem(hardwareMap, dashboardTelemetry);
+        horizontalArm = new HorizontalArm(hardwareMap);
+        horizontalHand = new HorizontalHand(hardwareMap);
+        myLimeLight = new MyLimeLight(hardwareMap);
+        blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinken");
+        rgbLED = hardwareMap.get(Servo.class,"rgbLight");
+        horizontalSliders = new HorizontalSliders(hardwareMap);
+        //***********************************
+
+        if (allianceColor.equals(AllianceColor.BLUE)) {
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        } else {
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        }
 
         dashboardTelemetry.addData("Status", "Initialized");
         dashboardTelemetry.update();
