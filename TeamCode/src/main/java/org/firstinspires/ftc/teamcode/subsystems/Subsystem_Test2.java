@@ -143,7 +143,7 @@ public class Subsystem_Test2 extends OpMode {
             horizontalHand.handPar();
             horizontalHand.openClaw();
             verticalSystem.goHome();
-            rgbLED.setPosition(.388);
+            rgbLED.setPosition(.4);
             isScanning = true;
             headlights.setPower(1);
             myLimeLight.start(0); //0 red, 1 blue, 2 yellow
