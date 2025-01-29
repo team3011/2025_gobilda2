@@ -91,6 +91,21 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         dashboardTelemetry.update();
     }
 
+    /*
+     * Code to run ONCE when the driver hits START
+        ***********************************
+        copied from subsystem test 2 01/29
+        ***********************************
+     */
+    @Override
+    public void start() {
+        horizontalArm.goToStartPos();
+        horizontalHand.wristPickup();
+        horizontalHand.handPar();
+        headlights.setPower(0);
+
+    }
+
     public void loop() {
         //update gamepad values
         g1.readButtons();
@@ -117,6 +132,134 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         //if (g1.wasJustPressed(GamepadKeys.Button.B)) headingOffset = rawHeading;
         //if (g1.wasJustPressed(GamepadKeys.Button.B)) headingOffset = Math.PI/2;
         //if (g1.wasJustPressed(GamepadKeys.Button.A)) headingOffset = 0;
+
+
+        //***********************************
+        //copied from subsystem test 2 01/29
+        //***********************************
+        //for testing verticalSystem
+        if (this.g1.isDown(GamepadKeys.Button.A)){
+            verticalSystem.goHome();
+        } else if (this.g1.isDown(GamepadKeys.Button.B)) {
+            verticalSystem.prepToTransfer();
+        } else if (this.g1.isDown(GamepadKeys.Button.Y)) {
+            verticalSystem.prepToBasket();
+        } else if (this.g1.isDown(GamepadKeys.Button.X)) {
+            verticalSystem.openGripper();
+        }
+
+        if (armPauseTriggered && armTimer.milliseconds() > VerticalSystem.gripPause/2) {
+            horizontalArm.toStowPos();
+            horizontalHand.openClaw();
+            armPauseTriggered = false;
+        }
+
+        //for testing horizontalSystem
+        if (this.g1.isDown(GamepadKeys.Button.DPAD_DOWN)){
+            horizontalArm.toPickupPos();
+            horizontalHand.wristPickup();
+            horizontalHand.openClaw();
+            rgbLED.setPosition(.279);
+            myLimeLight.stop();
+            isScanning = false;
+            headlights.setPower(0);
+        } else if (this.g1.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
+            scanPause.reset();
+            horizontalArm.toScanPos();
+            horizontalHand.wristPickup();
+            horizontalHand.handPar();
+            horizontalHand.openClaw();
+            verticalSystem.goHome();
+            rgbLED.setPosition(.4);
+            isScanning = true;
+            headlights.setPower(1);
+            myLimeLight.start(0); //0 red, 1 blue, 2 yellow
+        } else if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)) {
+            rgbLED.setPosition(1);
+            verticalSystem.prepToTransfer();
+            horizontalHand.closeClaw();
+            clawTimer.reset();
+            while (clawTimer.milliseconds() < clawPause) {
+
+            }
+            horizontalArm.toTransferPos();
+            horizontalHand.wristTransfer();
+            horizontalHand.handPar();
+            transferTriggered = true;
+            transferTimer.reset();
+            horizontalSliders.setPosition(0);
+        }
+
+        if (transferTriggered && transferTimer.milliseconds() > transferPause && horizontalSliders.getPositionMM() < 10) {
+            transferTriggered = false;
+            verticalSystem.prepToStow();
+            armPauseTriggered = true;
+            armTimer.reset();
+        }
+
+        if (isScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
+            horizontalHand.setPositionByCamera(myLimeLight.getAngle());
+            dashboardTelemetry.addData("xloc", myLimeLight.getxLoc());
+            dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
+            dashboardTelemetry.addData("angle",myLimeLight.getAngle());
+            if (myLimeLight.getyLoc() == 0){
+                horizontalSliders.manualInput(scanPowerFast);
+            } else if (myLimeLight.getyLoc() < .05){
+                //move out - blue
+                rgbLED.setPosition(.6);
+                horizontalSliders.manualInput(scanPowerSlow);
+            } else if (myLimeLight.getyLoc() > .15) {
+                //move in
+                horizontalSliders.manualInput(-scanPowerSlow);
+                rgbLED.setPosition(.4);
+            } else {
+                //we good
+                //isScanning = false;
+                rgbLED.setPosition(.5);
+                horizontalSliders.manualInput(0);
+
+                //dpad down
+                horizontalArm.toPickupPos();
+                horizontalHand.wristPickup();
+                horizontalHand.openClaw();
+                rgbLED.setPosition(.279);
+                myLimeLight.stop();
+                isScanning = false;
+                headlights.setPower(0);
+                isPickupPause = true;
+                pickUpPauseTimer.reset();
+            }
+
+            //horizontalHand.setPosition();
+        }
+
+        if (isPickupPause && pickUpPauseTimer.milliseconds() > pickUpPause) {
+            rgbLED.setPosition(1);
+            verticalSystem.prepToTransfer();
+            horizontalHand.closeClaw();
+            clawTimer.reset();
+            while (clawTimer.milliseconds() < clawPause) {
+
+            }
+            horizontalArm.toTransferPos();
+            horizontalHand.wristTransfer();
+            horizontalHand.handPar();
+            transferTriggered = true;
+            transferTimer.reset();
+            horizontalSliders.setPosition(0);
+            isPickupPause = false;
+        }
+
+        dashboardTelemetry.addData("isScanning",isScanning);
+
+        horizontalArm.update();
+        verticalSystem.update();
+        //***********************************
+
+
+
+
+
 
         dashboardTelemetry.update();
     }
