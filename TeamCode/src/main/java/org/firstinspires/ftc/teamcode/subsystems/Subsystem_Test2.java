@@ -12,6 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -48,7 +49,7 @@ public class Subsystem_Test2 extends OpMode {
     public static int pickUpPause = 650;
     boolean isPickupPause = false;
     ElapsedTime pickUpPauseTimer = new ElapsedTime();
-
+    DcMotor headlights;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -57,6 +58,7 @@ public class Subsystem_Test2 extends OpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
+        headlights = hardwareMap.get(DcMotor.class, "led");
         verticalSystem = new VerticalSystem(hardwareMap, dashboardTelemetry);
         horizontalArm = new HorizontalArm(hardwareMap);
         horizontalHand = new HorizontalHand(hardwareMap);
@@ -66,8 +68,6 @@ public class Subsystem_Test2 extends OpMode {
         horizontalSliders = new HorizontalSliders(hardwareMap);
         this.g1 = new GamepadEx(gamepad1);
         blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-
-
 
         // Tell the driver that initialization is complete.
         dashboardTelemetry.addData("Status", "Initialized");
@@ -79,7 +79,6 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void init_loop() {
-
     }
 
     /*
@@ -90,7 +89,7 @@ public class Subsystem_Test2 extends OpMode {
         horizontalArm.goToStartPos();
         horizontalHand.wristPickup();
         horizontalHand.handPar();
-
+        headlights.setPower(0);
 
     }
 
@@ -107,6 +106,9 @@ public class Subsystem_Test2 extends OpMode {
         this.right_x = zeroAnalogInput(g1.getRightX());
         this.left_t = -zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));
         this.right_t = zeroAnalogInput(g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
+        dashboardTelemetry.addData("XLoc:", myLimeLight.getxLoc());
+        dashboardTelemetry.addData("YLoc:", myLimeLight.getyLoc());
+        dashboardTelemetry.addData("Angle:", myLimeLight.getAngle());
 
         //for testing verticalSystem
         if (this.g1.isDown(GamepadKeys.Button.A)){
@@ -125,7 +127,6 @@ public class Subsystem_Test2 extends OpMode {
             armPauseTriggered = false;
         }
 
-
         //for testing horizontalSystem
         if (this.g1.isDown(GamepadKeys.Button.DPAD_DOWN)){
             horizontalArm.toPickupPos();
@@ -134,6 +135,7 @@ public class Subsystem_Test2 extends OpMode {
             rgbLED.setPosition(.279);
             myLimeLight.stop();
             isScanning = false;
+            headlights.setPower(0);
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
             scanPause.reset();
             horizontalArm.toScanPos();
@@ -143,6 +145,7 @@ public class Subsystem_Test2 extends OpMode {
             verticalSystem.goHome();
             rgbLED.setPosition(.388);
             isScanning = true;
+            headlights.setPower(1);
             myLimeLight.start(0); //0 red, 1 blue, 2 yellow
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)) {
             rgbLED.setPosition(1);
@@ -174,11 +177,11 @@ public class Subsystem_Test2 extends OpMode {
             dashboardTelemetry.addData("angle",myLimeLight.getAngle());
             if (myLimeLight.getyLoc() == 0){
                 horizontalSliders.manualInput(scanPowerFast);
-            } else if (myLimeLight.getyLoc() < -.15){
+            } else if (myLimeLight.getyLoc() < .05){
                 //move out - blue
                 rgbLED.setPosition(.6);
                 horizontalSliders.manualInput(scanPowerSlow);
-            } else if (myLimeLight.getyLoc() > -.05) {
+            } else if (myLimeLight.getyLoc() > .15) {
                 //move in
                 horizontalSliders.manualInput(-scanPowerSlow);
                 rgbLED.setPosition(.4);
@@ -195,6 +198,7 @@ public class Subsystem_Test2 extends OpMode {
                 rgbLED.setPosition(.279);
                 myLimeLight.stop();
                 isScanning = false;
+                headlights.setPower(0);
                 isPickupPause = true;
                 pickUpPauseTimer.reset();
             }

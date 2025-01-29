@@ -13,7 +13,7 @@ public class HorizontalHand {
     public static double perp = .46;
     public static double open = .2;
     public static double closed = .45;
-    public static double down = 0;
+    public static double down = 0.03;
     public static double up = .55;
 
     public HorizontalHand(HardwareMap hardwareMap){
