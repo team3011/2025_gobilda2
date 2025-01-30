@@ -58,7 +58,7 @@ public class VerticalSystem {
     }
 
     public void goHome(){
-        verticalSliders.setPosition(0);
+        verticalSliders.setPosition(-99);
         flipperTarget = 0;
         gripperTarget = 1;
     }

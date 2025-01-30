@@ -35,7 +35,8 @@ public class VerticalSliders {
     private boolean goingUp = false;
     private boolean holdingPosition = true;
     private int targetPositionMM;
-
+    private boolean check1 = false;
+    private boolean check2 = false;
 
     public VerticalSliders(@NonNull HardwareMap hardwareMap){
         this.rightMotor = hardwareMap.get(DcMotorEx.class,"vertiRight");
@@ -92,6 +93,11 @@ public class VerticalSliders {
                 this.goingUp = false;
             }
 
+            if(mm == -99 ){
+                this.resetFlag = true;
+                this.holdingPosition = false;
+            }
+
             if (mm > 940) {
                 mm = 940;
             }
@@ -127,7 +133,9 @@ public class VerticalSliders {
             }
 
             if (this.resetFlag && !this.goingUp && currentPosition < 400) {
+                check1 = true;
                 if (this.getCurrent(1) > maximumMilliamps){
+                    check2 = true;
                     this.resetFlag = false;
                     this.holdingPosition = true;
                     pid = 0;
@@ -142,15 +150,18 @@ public class VerticalSliders {
             this.rightMotor.setPower(pid);
             this.leftMotor.setPower(pid);
 
-//            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
-//            dashboardTelemetry.addData("vert-pid output", pid);
+            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
+            dashboardTelemetry.addData("vert-last position in ticks", lastPosition);
+            dashboardTelemetry.addData("vert-pid output", pid);
         }
 
-//        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
-//        dashboardTelemetry.addData("vert-going up", goingUp);
-//        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
-//        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
-//        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
+        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
+        dashboardTelemetry.addData("vert-going up", goingUp);
+        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
+        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
+        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
+        dashboardTelemetry.addData("check1", check1);
+        dashboardTelemetry.addData("check2", check2);
     }
 
     /**

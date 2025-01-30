@@ -89,6 +89,8 @@ public class Subsystem_Test2 extends OpMode {
         horizontalArm.goToStartPos();
         horizontalHand.wristPickup();
         horizontalHand.handPar();
+        verticalSystem.goHome();
+
         headlights.setPower(0);
 
     }
