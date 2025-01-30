@@ -15,7 +15,7 @@ public class VerticalFlipper {
     private double min = -135;
     private double max = 135;
     public static double pickupPos = 85;
-    public static double dropOffPos = -85;
+    public static double dropOffPos = -95;
 
     public VerticalFlipper(@NonNull HardwareMap hardwareMap){
         this.left = hardwareMap.get(ServoImplEx.class,"vflipleft");

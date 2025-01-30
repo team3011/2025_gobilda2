@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class VerticalSystem {
     //@Config variables
+    public static int Height_clip = 475;
+    public static int Height_clipClip = 350;
     public static int Height_transfer = 30;
     public static int Height_prepToLift = 0;
     public static int Height_basket = 900;
@@ -19,10 +21,10 @@ public class VerticalSystem {
     public static int Height_flipUp = 600;
     public static int Height_flipDown = 575;
     public static int gripPause = 1000;
-    static int flipperState = 0; //0 means facing forward, 1 means facing back
-    static int flipperTarget = 0; //same data as above
-    static int gripperState = 0; //0 means closed, 1 means open
-    static int gripperTarget = 0;
+    static int flipperState = -1; //0 means facing forward, 1 means facing back
+    static int flipperTarget = -1; //same data as above
+    static int gripperState = -1; //0 means closed, 1 means open
+    static int gripperTarget = -1;
     static ElapsedTime runtime = new ElapsedTime();
 
 
@@ -63,6 +65,28 @@ public class VerticalSystem {
         gripperTarget = 1;
     }
 
+    public void prepToSample(){
+        verticalSliders.setPosition(Height_sample);
+        verticalFlipper.goToDropOff();
+        flipperTarget = 1;
+        flipperState = 1;
+        gripperTarget = 1;
+    }
+
+    public void prepToClip(){
+        verticalSliders.setPosition(Height_clip);
+        verticalFlipper.goToDropOff();
+        flipperTarget = 1;
+        flipperState = 1;
+        gripperTarget = 0;
+    }
+
+    public void clipClip(){
+        verticalSliders.setPosition(Height_clipClip);
+        gripperTarget=1;
+    }
+
+
     public void openGripper(){
         gripperTarget = 1;
     }
@@ -74,7 +98,7 @@ public class VerticalSystem {
                 verticalGripper.goToRelease();
                 gripperState = 1;
             } else {
-                verticalGripper.goToHold();;
+                verticalGripper.goToHold();
                 gripperState = 0;
             }
         }
@@ -90,6 +114,6 @@ public class VerticalSystem {
                 flipperState = 0;
             }
         }
-
+        dashboardTelemetry.addData("gripper state", gripperState);
     }
 }
