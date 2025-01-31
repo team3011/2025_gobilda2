@@ -13,10 +13,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public class HorizontalSliders {
-    private DcMotorEx leftMotor;
+    Telemetry dashboardTelemetry;
+    private final DcMotorEx leftMotor;
     private int lastPosition = 0;
     private int targetPosition = 0;
-    private PIDController controller;
+    private final PIDController controller;
     public static double kP = 0.04;
     public static double kI = 0;
     public static double kD = 0;
@@ -30,12 +31,13 @@ public class HorizontalSliders {
     private int targetPositionMM;
     boolean manualMove = false;
 
-    public HorizontalSliders(@NonNull HardwareMap hardwareMap){
+    public HorizontalSliders(@NonNull HardwareMap hardwareMap, Telemetry db){
         this.leftMotor = hardwareMap.get(DcMotorEx.class, "horLeft");
         this.leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        this.controller = new PIDController(this.kP, this.kI, this.kD);
+        this.controller = new PIDController(kP, kI, kD);
+        dashboardTelemetry = db;
 
     }
 
@@ -55,7 +57,7 @@ public class HorizontalSliders {
     }
 
     public int getPositionMM(){
-        return Math.round(this.leftMotor.getCurrentPosition()*this.convertTicksToMillimeters);
+        return Math.round(leftMotor.getCurrentPosition()*convertTicksToMillimeters);
     }
 
     public void setPosition(int mm){
@@ -106,9 +108,9 @@ public class HorizontalSliders {
         return Math.round(this.leftMotor.getCurrent(CurrentUnit.MILLIAMPS)/10)*10;
     }
 
-    public void update(double lim, Telemetry dashboardTelemetry){
+    public void update(){
         if (!this.holdingPosition && !manualMove) {
-            double pid = 0;
+            double pid;
             //get the current position of the sliders
             int currentPosition = getPosition();
 
@@ -144,11 +146,11 @@ public class HorizontalSliders {
             //dashboardTelemetry.addData("hor-pid output", pid);
         }
 
-        dashboardTelemetry.addData("where am i?",getPositionMM());
-        dashboardTelemetry.addData("target?",targetPositionMM);
+        //dashboardTelemetry.addData("where am i?",getPositionMM());
+        //dashboardTelemetry.addData("target?",targetPositionMM);
         //dashboardTelemetry.addData("hor-reset Flag", resetFlag);
         //dashboardTelemetry.addData("hor-going out", goingUp);
-        dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
+        //dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
         //dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
         //dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
     }

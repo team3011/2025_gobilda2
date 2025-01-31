@@ -10,12 +10,10 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 @Config
 public class VerticalFlipper {
-    private ServoImplEx left;
-    private ServoImplEx right;
-    private double min = -135;
-    private double max = 135;
-    public static double pickupPos = 85;
-    public static double dropOffPos = -95;
+    private final ServoImplEx left;
+    private final ServoImplEx right;
+    public static double pickupPos = -95;
+    public static double dropOffPos = 85;
 
     public VerticalFlipper(@NonNull HardwareMap hardwareMap){
         this.left = hardwareMap.get(ServoImplEx.class,"vflipleft");
@@ -23,6 +21,7 @@ public class VerticalFlipper {
         this.left.setPwmRange(new PwmControl.PwmRange(500, 2500));
         this.right.setPwmRange(new PwmControl.PwmRange(500, 2500));
         this.right.setDirection(Servo.Direction.REVERSE);
+        goToPickUp();
     }
 
     public void goToPickUp(){
@@ -33,11 +32,10 @@ public class VerticalFlipper {
         setPosition(dropOffPos);
     }
 
-    private double setPosition(double input){
-        input = map(input,min,max,0,1);
+    private void setPosition(double input){
+        input = map(input,-135,135,0,1);
         this.left.setPosition(input);
         this.right.setPosition(input);
-        return input;
     }
 
     private double map(double x, double in_min, double in_max, double out_min, double out_max) {

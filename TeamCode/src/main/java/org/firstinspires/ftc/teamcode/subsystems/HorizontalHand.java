@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class HorizontalHand {
-    private Servo wrist;
-    private Servo hand;
-    private Servo finger;
+    private final Servo wrist;
+    private final Servo hand;
+    private final Servo finger;
     public static double par = .79;
     public static double perp = .46;
     public static double open = .2;
@@ -32,10 +32,6 @@ public class HorizontalHand {
 
     public void handPar(){
         hand.setPosition(par);
-    }
-
-    public void handPerp(){
-        hand.setPosition(perp);
     }
 
     public void wristTransfer(){

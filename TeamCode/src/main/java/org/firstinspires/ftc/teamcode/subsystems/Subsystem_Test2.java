@@ -50,6 +50,8 @@ public class Subsystem_Test2 extends OpMode {
     boolean isPickupPause = false;
     ElapsedTime pickUpPauseTimer = new ElapsedTime();
     DcMotor headlights;
+    public static double upperLimit = .05;
+    public static double lowerLimit = -.05;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -65,7 +67,7 @@ public class Subsystem_Test2 extends OpMode {
         myLimeLight = new MyLimeLight(hardwareMap);
         blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinken");
         rgbLED = hardwareMap.get(Servo.class,"rgbLight");
-        horizontalSliders = new HorizontalSliders(hardwareMap);
+        horizontalSliders = new HorizontalSliders(hardwareMap,dashboardTelemetry);
         this.g1 = new GamepadEx(gamepad1);
         blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
 
@@ -179,11 +181,11 @@ public class Subsystem_Test2 extends OpMode {
             dashboardTelemetry.addData("angle",myLimeLight.getAngle());
             if (myLimeLight.getyLoc() == 0){
                 horizontalSliders.manualInput(scanPowerFast);
-            } else if (myLimeLight.getyLoc() < .05){
+            } else if (myLimeLight.getyLoc() < lowerLimit){
                 //move out - blue
                 rgbLED.setPosition(.6);
                 horizontalSliders.manualInput(scanPowerSlow);
-            } else if (myLimeLight.getyLoc() > .15) {
+            } else if (myLimeLight.getyLoc() > upperLimit) {
                 //move in
                 horizontalSliders.manualInput(-scanPowerSlow);
                 rgbLED.setPosition(.4);
@@ -249,7 +251,7 @@ public class Subsystem_Test2 extends OpMode {
         } else if (this.g1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             horizontalSliders.setPosition(iTesting);
         }
-        horizontalSliders.update(1,this.dashboardTelemetry);
+        horizontalSliders.update();
 
         //this is to test vflippy
 //        if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)){

@@ -3,10 +3,9 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 public class MyLimeLight {
-    private Limelight3A limelight;
+    private final Limelight3A limelight;
     private int pipeline = 0;
     private double xLoc;
     private double yLoc;
