@@ -13,7 +13,8 @@ public class VerticalFlipper {
     private final ServoImplEx left;
     private final ServoImplEx right;
     public static double pickupPos = -95;
-    public static double dropOffPos = 85;
+    public static double dropOffPosBasket = 75;
+    public static double dropOffPosClips = 85;
 
     public VerticalFlipper(@NonNull HardwareMap hardwareMap){
         this.left = hardwareMap.get(ServoImplEx.class,"vflipleft");
@@ -28,9 +29,11 @@ public class VerticalFlipper {
         setPosition(pickupPos);
     }
 
-    public void goToDropOff(){
-        setPosition(dropOffPos);
+    public void goToDropOffBasket(){
+        setPosition(dropOffPosBasket);
     }
+
+    public void goToDropOffClip() { setPosition(dropOffPosClips);}
 
     private void setPosition(double input){
         input = map(input,-135,135,0,1);

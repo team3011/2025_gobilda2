@@ -14,7 +14,7 @@ public class HorizontalHand {
     public static double open = .2;
     public static double closed = .42;
     public static double down = 0.03;
-    public static double up = .55;
+    public static double up = .6;
 
     public HorizontalHand(HardwareMap hardwareMap){
         this.wrist = hardwareMap.get(Servo.class, "wrist");

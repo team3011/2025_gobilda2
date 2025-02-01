@@ -238,7 +238,7 @@ public class PinpointDrive extends MecanumDrive {
                 if (Math.abs(y) > 0 || Math.abs(x) > 0) {
                     double rotSpeed = Math.abs(shorter);
                     if (rotSpeed > 20) {
-                        rotSpeed = 0.70;
+                        rotSpeed = 1;
                     } else {
                         rotSpeed = correctionMultiplier * rotSpeed * rotSpeed / 800.0;
                     }
@@ -247,7 +247,7 @@ public class PinpointDrive extends MecanumDrive {
                     //this means we are not moving but not pointing in the right direction
                     double rotSpeed = Math.abs(shorter);
                     if (rotSpeed > 20) {
-                        rotSpeed = 0.70;
+                        rotSpeed = 1;
                     } else {
                         rotSpeed = 2 * correctionMultiplier * rotSpeed * rotSpeed / 800.0;
                     }

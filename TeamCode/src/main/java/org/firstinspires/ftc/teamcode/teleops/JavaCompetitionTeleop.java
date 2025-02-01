@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Odometry;
 import org.firstinspires.ftc.teamcode.subsystems.SuperSystem;
 
 /** @noinspection unused*/
@@ -24,12 +25,14 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     SuperSystem superSystem;
+    Odometry odometry;
 
     public void init() {
         superSystem = new SuperSystem(hardwareMap,dashboardTelemetry);
         drive = new PinpointDrive(hardwareMap, new Pose2d(0, 0, 0));
         g1 = new GamepadEx(gamepad1);
         allianceColor = getAllianceColor();
+        odometry = new Odometry(hardwareMap);
 
         if (allianceColor.equals(AllianceColor.BLUE)) {
             superSystem.setAlliance(true);
@@ -47,6 +50,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     @Override
     public void start() {
         superSystem.start();
+        odometry.odoUp();
     }
 
     public void loop() {
@@ -62,7 +66,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         //driver 1
         if (allianceColor.equals(AllianceColor.BLUE)) {
             //drive.drive(digitalTransmission(-left_x), digitalTransmission(left_y), right_x, false, dashboardTelemetry);
-            drive.drive2(digitalTransmission(left_x),digitalTransmission(left_y),right_x, dashboardTelemetry);
+            drive.drive2(digitalTransmission(-left_x),digitalTransmission(-left_y),right_x, dashboardTelemetry);
         }
 
         //this modifies the field centric direction
@@ -80,7 +84,16 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
                 superSystem.reset();
             } else if (this.g1.isDown(GamepadKeys.Button.B)) { //really O
-                superSystem.scan();
+                superSystem.scan(0);
+//                if(superSystem.getToggleState() == 0){
+//                    superSystem.scan(1);
+//                }else if(superSystem.getToggleState() == 1){
+//                    if(allianceColor.equals(AllianceColor.BLUE)){
+//                        superSystem.scan(2);
+//                    }else if(allianceColor.equals(AllianceColor.RED)){
+//                        superSystem.scan(0);
+//                    }
+//                }
             } else if (this.g1.isDown(GamepadKeys.Button.Y)) { //really ^
                 superSystem.prepToDropOff();
             } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []
@@ -88,13 +101,13 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             }
         }else{
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
-                drive.setHeadingToMaintain(180); // 180 degrees???
+                drive.setHeadingToMaintain(0); // 180 degrees???
             } else if (this.g1.isDown(GamepadKeys.Button.B)) { //really O
-                drive.setHeadingToMaintain(-90);
-            } else if (this.g1.isDown(GamepadKeys.Button.Y)) { //really ^
-                drive.setHeadingToMaintain(0);
-            } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []
                 drive.setHeadingToMaintain(90);
+            } else if (this.g1.isDown(GamepadKeys.Button.Y)) { //really ^
+                drive.setHeadingToMaintain(180);
+            } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []
+                drive.setHeadingToMaintain(-90);
             }
         }
 

@@ -146,12 +146,13 @@ public class HorizontalSliders {
             //dashboardTelemetry.addData("hor-pid output", pid);
         }
 
-        //dashboardTelemetry.addData("where am i?",getPositionMM());
-        //dashboardTelemetry.addData("target?",targetPositionMM);
-        //dashboardTelemetry.addData("hor-reset Flag", resetFlag);
-        //dashboardTelemetry.addData("hor-going out", goingUp);
-        //dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
-        //dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
-        //dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
+//        dashboardTelemetry.addData("where am i?",getPositionMM());
+//        dashboardTelemetry.addData("target?",targetPositionMM);
+//        dashboardTelemetry.addData("hor-reset Flag", resetFlag);
+//        dashboardTelemetry.addData("hor-going out", goingUp);
+//        dashboardTelemetry.addData("hor-milliamps", this.getCurrent());
+//        dashboardTelemetry.addData("hor-holding pos", this.holdingPosition);
+//        dashboardTelemetry.addData("hor-target position in ticks", this.targetPosition);
+//        dashboardTelemetry.update();
     }
 }

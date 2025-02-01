@@ -23,7 +23,7 @@ public class VerticalSliders {
     private int lastPosition = 0;
     private int targetPosition = 0;
     private PIDController controller;
-    public static double kP = 0.02;
+    public static double kP = 0.015;
     public static double kI = 0.001;
     public static double kD = 0.0003;
     public static double kG = 0.015;
@@ -35,8 +35,6 @@ public class VerticalSliders {
     private boolean goingUp = false;
     private boolean holdingPosition = true;
     private int targetPositionMM;
-    private boolean check1 = false;
-    private boolean check2 = false;
     Telemetry dashboardTelemetry;
 
     public VerticalSliders(@NonNull HardwareMap hardwareMap, Telemetry db){
@@ -135,9 +133,7 @@ public class VerticalSliders {
             }
 
             if (this.resetFlag && !this.goingUp && currentPosition < 400) {
-                check1 = true;
                 if (this.getCurrent(1) > maximumMilliamps){
-                    check2 = true;
                     this.resetFlag = false;
                     this.holdingPosition = true;
                     pid = 0;
@@ -152,16 +148,16 @@ public class VerticalSliders {
             this.rightMotor.setPower(pid);
             this.leftMotor.setPower(pid);
 
-            //dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
-            //dashboardTelemetry.addData("vert-last position in ticks", lastPosition);
-            //dashboardTelemetry.addData("vert-pid output", pid);
+            dashboardTelemetry.addData("vert-current position in ticks", currentPosition);
+            dashboardTelemetry.addData("vert-last position in ticks", lastPosition);
+            dashboardTelemetry.addData("vert-pid output", pid);
         }
 
 //        dashboardTelemetry.addData("vert-reset Flag", resetFlag);
-//        dashboardTelemetry.addData("vert-going up", goingUp);
+        dashboardTelemetry.addData("vert-going up", goingUp);
 //        dashboardTelemetry.addData("vert-milliamps", this.getCurrent(1));
 //        dashboardTelemetry.addData("vert-holding pos", this.holdingPosition);
-//        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
+        dashboardTelemetry.addData("vert-target position in ticks", this.targetPosition);
 //        dashboardTelemetry.addData("check1", check1);
 //        dashboardTelemetry.addData("check2", check2);
     }

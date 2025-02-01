@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class MyLimeLight {
     private final Limelight3A limelight;
-    private int pipeline = 0;
     private double xLoc;
     private double yLoc;
     private double angle;
@@ -16,7 +15,7 @@ public class MyLimeLight {
     }
 
     public void start(int input){
-        pipeline = input;
+        limelight.pipelineSwitch(input);
         limelight.start();
     }
 
