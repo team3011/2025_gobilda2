@@ -214,6 +214,10 @@ public class PinpointDrive extends MecanumDrive {
         return input;
     }
 
+    public void setHeadingToMaintain(double input){
+        this.headingToMaintain = input;
+    }
+
     public void drive2(double x, double y, double rx, Telemetry db){
         double robotHeadingRAD = calcYaw(db);
         double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);

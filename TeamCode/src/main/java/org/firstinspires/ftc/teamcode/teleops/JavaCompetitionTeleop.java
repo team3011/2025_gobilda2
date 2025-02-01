@@ -74,6 +74,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             superSystem.toggle();
         }
 
+
         //this will run all of our supersystem commands
         if (g1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
@@ -85,7 +86,18 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []
                 superSystem.dropOff();
             }
+        }else{
+            if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
+                drive.setHeadingToMaintain(180); // 180 degrees???
+            } else if (this.g1.isDown(GamepadKeys.Button.B)) { //really O
+                drive.setHeadingToMaintain(-90);
+            } else if (this.g1.isDown(GamepadKeys.Button.Y)) { //really ^
+                drive.setHeadingToMaintain(0);
+            } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []
+                drive.setHeadingToMaintain(90);
+            }
         }
+
 
 
         superSystem.update();
