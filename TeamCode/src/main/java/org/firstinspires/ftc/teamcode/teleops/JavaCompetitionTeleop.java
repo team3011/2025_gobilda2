@@ -84,16 +84,16 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
                 superSystem.reset();
             } else if (this.g1.isDown(GamepadKeys.Button.B)) { //really O
-                superSystem.scan(0);
-//                if(superSystem.getToggleState() == 0){
-//                    superSystem.scan(1);
-//                }else if(superSystem.getToggleState() == 1){
-//                    if(allianceColor.equals(AllianceColor.BLUE)){
-//                        superSystem.scan(2);
-//                    }else if(allianceColor.equals(AllianceColor.RED)){
-//                        superSystem.scan(0);
-//                    }
-//                }
+//                superSystem.scan(2);
+                if(superSystem.getToggleState() == 0){
+                    superSystem.scan(1);
+                }else if(superSystem.getToggleState() == 1){
+                    if(allianceColor.equals(AllianceColor.BLUE)){
+                        superSystem.scan(2);
+                    }else if(allianceColor.equals(AllianceColor.RED)){
+                        superSystem.scan(0);
+                    }
+                }
             } else if (this.g1.isDown(GamepadKeys.Button.Y)) { //really ^
                 superSystem.prepToDropOff();
             } else if (this.g1.isDown(GamepadKeys.Button.X)) { ////really []

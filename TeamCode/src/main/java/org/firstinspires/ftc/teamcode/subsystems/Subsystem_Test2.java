@@ -88,12 +88,12 @@ public class Subsystem_Test2 extends OpMode {
      */
     @Override
     public void start() {
-        horizontalArm.goToStartPos();
+        horizontalArm.toScanPos();
         horizontalHand.wristPickup();
         horizontalHand.handPar();
         verticalSystem.goHome();
 
-        headlights.setPower(0);
+        headlights.setPower(1);
 
     }
 
@@ -150,7 +150,7 @@ public class Subsystem_Test2 extends OpMode {
             rgbLED.setPosition(.4);
             isScanning = true;
             headlights.setPower(1);
-            myLimeLight.start(0); //0 red, 1 blue, 2 yellow
+            myLimeLight.start(2); //0 red, 2 blue, 1 yellow
         } else if (this.g1.isDown(GamepadKeys.Button.DPAD_UP)) {
             rgbLED.setPosition(1);
             verticalSystem.prepToTransfer();
