@@ -29,27 +29,20 @@ public class PinpointDrive extends MecanumDrive {
     public static double ANGULAR_TOLERANCE_DEGREES = 2;
     public static double rotMulti = 1.1;
 
-
-
     public static Params PARAMS = new Params();
     public GoBildaPinpointDriverRR pinpoint;
     private Pose2d lastPinpointPose = pose;
     private double headingToMaintain = 0;
+
     public PinpointDrive(HardwareMap hardwareMap, Pose2d pose) {
         super(hardwareMap, pose);
         FlightRecorder.write("PINPOINT_PARAMS", PARAMS);
         pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class, "pinpoint");
 
-
         // RR localizer note: don't love this conversion (change driver?)
         pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
-
-
         pinpoint.setEncoderResolution(PARAMS.encoderResolution);
-
-
         pinpoint.setEncoderDirections(PARAMS.xDirection, PARAMS.yDirection);
-
 
        /*
        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
@@ -174,7 +167,7 @@ public class PinpointDrive extends MecanumDrive {
     //***************************************************
 
     //returns the current heading of the robot in RAD
-    public double calcYaw(Telemetry db) {
+    public double calcYaw() {
         pinpoint.update(GoBildaPinpointDriver.readData.ONLY_UPDATE_HEADING);
         return Math.round(pinpoint.getHeading()*10)/10.0;
     }
@@ -218,16 +211,14 @@ public class PinpointDrive extends MecanumDrive {
         this.headingToMaintain = input;
     }
 
-    public void drive2(double x, double y, double rx, Telemetry db){
-        double robotHeadingRAD = calcYaw(db);
+    public void drive2(double x, double y, double rx){
+        double robotHeadingRAD = calcYaw();
         double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);
-        db.addData("yaw rads",robotHeadingRAD);
 
         if(rx == 0){
             //we're trying to maintain our current heading
             //calc the shortest deviation to target heading in degrees
             double shorter = this.figureOutWhatIsShorter(robotHeadingDEG);
-            db.addData("shorter",shorter);
             //check if we are within tolerance
             boolean isWithinAngularTolerance =
                     Math.abs(shorter) < ANGULAR_TOLERANCE_DEGREES;
@@ -280,14 +271,6 @@ public class PinpointDrive extends MecanumDrive {
         rightBack.setPower(backRightPower);
         leftFront.setPower(frontLeftPower);
         rightFront.setPower(frontRightPower);
-
-        db.addData("rx",rx);
-        db.addData("fLP",frontLeftPower);
-        db.addData("fRP",frontRightPower);
-        db.addData("rLP",backLeftPower);
-        db.addData("rRP",backRightPower);
-
-
     }
 
     //code taken from https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
@@ -295,7 +278,7 @@ public class PinpointDrive extends MecanumDrive {
         double x = leftStickX;
         double y = leftStickY; // Counteract imperfect strafing
         double rx = rightStickX * PARAMS.rotation_multi; //what way we want to rotate
-        double robotHeadingRAD = calcYaw(db);
+        double robotHeadingRAD = calcYaw();
         double robotHeadingDEG = Math.toDegrees(robotHeadingRAD);
 
 
@@ -374,6 +357,10 @@ public class PinpointDrive extends MecanumDrive {
 
     private double map(double x, double in_min, double in_max, double out_min, double out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+
+    public double getHeadingToMaintain(){
+        return headingToMaintain;
     }
 
 }

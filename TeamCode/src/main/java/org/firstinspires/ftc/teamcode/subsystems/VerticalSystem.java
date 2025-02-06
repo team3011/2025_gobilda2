@@ -11,9 +11,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class VerticalSystem {
     //@Config variables
-    public static int Height_clip = 475;
+    public static int Height_clip = 450;
     public static int Height_clipClip = 350;
-    public static int Height_transfer = 30;
+    public static int Height_transfer = 40;
     public static int Height_prepToLift = 500;
     public static int Height_basket = 940;
     public static int Height_stow = 300;
@@ -60,11 +60,13 @@ public class VerticalSystem {
         verticalSliders.setPosition(-99);
         verticalFlipper.goToPickUp();
         gripperTarget = 1;
+        verticalSliders.setKG(.015);
     }
 
     public void prepToLift(){
         verticalSliders.setPosition(Height_prepToLift);
         verticalFlipper.goToPickUp();
+        verticalSliders.setKG(.025);
     }
 
     public void prepToClip(){

@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
@@ -19,7 +18,6 @@ public class SuperSystem {
     public static HorizontalArm horizontalArm;
     public static HorizontalHand horizontalHand;
     public static HorizontalSliders horizontalSliders;
-
     //set up timers
     ElapsedTime clawTimer = new ElapsedTime();
     public static int clawPause = 500;
@@ -37,6 +35,11 @@ public class SuperSystem {
     public static double scanPowerSlow = .3;
     public static double upperLimit = .05;
     public static double lowerLimit = -.05;
+    public static int xScanDirection = 0;
+    public boolean xReady = false;
+    public boolean yReady = false;
+    public static double xLeftLimit = -0.15;
+    public static double xRightLimit = 0.05;
 
     //set up vision
     RevBlinkinLedDriver blinkin;
@@ -87,24 +90,38 @@ public class SuperSystem {
         if (isScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
             horizontalHand.setPositionByCamera(myLimeLight.getAngle());
             dashboardTelemetry.addData("xloc", myLimeLight.getxLoc());
-            dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
-            dashboardTelemetry.addData("angle",myLimeLight.getAngle());
-            if (myLimeLight.getyLoc() == 0){
-                horizontalSliders.manualInput(scanPowerFast);
-            } else if (myLimeLight.getyLoc() < lowerLimit){
-                //move out - blue
-                rgbLED.setPosition(.722); //violet
-                horizontalSliders.manualInput(scanPowerSlow);
-            } else if (myLimeLight.getyLoc() > upperLimit) {
-                //move in
-                horizontalSliders.manualInput(-scanPowerSlow);
-                rgbLED.setPosition(.333); //orange
-            } else {
+            //dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
+            //dashboardTelemetry.addData("angle",myLimeLight.getAngle());
+            if(!yReady){
+                if (myLimeLight.getyLoc() == 0){
+                    horizontalSliders.manualInput(scanPowerFast);
+                } else if (myLimeLight.getyLoc() < lowerLimit){
+                    //move out - blue
+                    rgbLED.setPosition(.722); //violet
+                    horizontalSliders.manualInput(scanPowerSlow);
+                } else if (myLimeLight.getyLoc() > upperLimit) {
+                    //move in
+                    horizontalSliders.manualInput(-scanPowerSlow);
+                    rgbLED.setPosition(.333); //orange
+                } else{
+                    yReady = true;
+                    horizontalSliders.manualInput(0);
+                }
+            }else{
+                if (myLimeLight.getxLoc() < xLeftLimit){ //robot moves left
+                    xScanDirection = -1;
+                } else if (myLimeLight.getxLoc() > xRightLimit){ //robot moves right
+                    xScanDirection = 1;
+                }else{
+                    xScanDirection = 0;
+                    xReady = true;
+                }
+            }
+            if(xReady && yReady){
                 //we good
                 //isScanning = false;
                 rgbLED.setPosition(.5); //sets to green
                 horizontalSliders.manualInput(0);
-
                 //dpad down
                 horizontalArm.toPickupPos();
                 horizontalHand.wristPickup();
@@ -114,6 +131,8 @@ public class SuperSystem {
                 headlights.setPower(0);
                 isPickupPause = true;
                 pickUpPauseTimer.reset();
+                xReady = false;
+                yReady = false;
             }
         }
 
@@ -137,6 +156,8 @@ public class SuperSystem {
         verticalSystem.update();
         horizontalSliders.update();
         dashboardTelemetry.addData("toggleState",toggleState);
+        dashboardTelemetry.addData("hor-vel", horizontalSliders.getCurrent());
+        dashboardTelemetry.addData("xScanDirection", xScanDirection);
     }
 
     public void setAlliance(boolean input){
@@ -172,6 +193,8 @@ public class SuperSystem {
     }
 
     public void reset(){
+        isScanning = false;
+        horizontalSliders.setPosition(0);
         horizontalArm.goToStartPos();
         horizontalHand.wristPickup();
         horizontalHand.handPar();
@@ -188,7 +211,6 @@ public class SuperSystem {
         verticalSystem.goHome();
         isScanning = true;
         headlights.setPower(1);
-
         //***** NEED TO FIX LL PIPELINES BEFORE CHANGING THIS ******
         myLimeLight.start(input); //0 red, 1 yellow, 2 blue
     }
@@ -213,7 +235,15 @@ public class SuperSystem {
         }
     }
 
+    public void toPreScan(){
+        horizontalArm.toScanPos();
+    }
+
     public int getToggleState(){
         return toggleState;
     }
+
+    public boolean getIsScanning(){return isScanning; }
+
+    public int getXScanDirection(){return xScanDirection;}
 }

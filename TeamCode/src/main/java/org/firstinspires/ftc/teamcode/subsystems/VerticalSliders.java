@@ -52,6 +52,10 @@ public class VerticalSliders {
         this.controller = new PIDController(kP, kI, kD);
     }
 
+    public void setKG(double input){
+        kG = input;
+    }
+
     public double getCurrent(int motor){
         if (motor == 0) {
             return Math.round(this.leftMotor.getCurrent(CurrentUnit.MILLIAMPS)/10)*10;

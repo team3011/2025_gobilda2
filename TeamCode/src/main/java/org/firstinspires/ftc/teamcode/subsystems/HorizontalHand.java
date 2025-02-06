@@ -15,6 +15,7 @@ public class HorizontalHand {
     public static double closed = .42;
     public static double down = 0.03;
     public static double up = .6;
+    public static double limit = 0.20;
 
     public HorizontalHand(HardwareMap hardwareMap){
         this.wrist = hardwareMap.get(Servo.class, "wrist");
@@ -49,8 +50,8 @@ public class HorizontalHand {
         //.79-.46 = servo per 90
         double servoPerDeg = 0.0036666666666667;
         double output = perp - servoPerDeg*input;
-        if (output < .2) {
-            output = .2;
+        if (output < limit) {
+            output = limit;
         }
         hand.setPosition(output);
     }

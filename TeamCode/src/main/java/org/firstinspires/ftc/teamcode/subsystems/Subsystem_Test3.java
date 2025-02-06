@@ -25,7 +25,7 @@ public class Subsystem_Test3 extends OpMode {
     //this section allows us to access telemetry data from a browser
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
+    PinpointDrive drive = new PinpointDrive(hardwareMap,new Pose2d(0, 0, 0));
 
     GamepadEx g1;
     double left_y, right_y, left_x, right_x, left_t, right_t;
