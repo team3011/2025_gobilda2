@@ -40,6 +40,7 @@ public class SuperSystem {
     public boolean yReady = false;
     public static double xLeftLimit = -0.15;
     public static double xRightLimit = 0.05;
+    public static int scanToggle;
 
     //set up vision
     RevBlinkinLedDriver blinkin;
@@ -141,7 +142,8 @@ public class SuperSystem {
             verticalSystem.prepToTransfer();
             horizontalHand.closeClaw();
             clawTimer.reset();
-            while (clawTimer.milliseconds() < clawPause) {}
+            while (clawTimer.milliseconds() < clawPause) {
+            }
             horizontalArm.toTransferPos();
             horizontalHand.wristTransfer();
             horizontalHand.handPar();

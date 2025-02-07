@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class VerticalSystem {
     //@Config variables
     public static int Height_clip = 450;
-    public static int Height_clipClip = 350;
+    public static int Height_clipClip = 345;
     public static int Height_transfer = 40;
     public static int Height_prepToLift = 500;
     public static int Height_basket = 940;

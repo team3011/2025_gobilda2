@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.subsystems.HorizontalArm;
 import org.firstinspires.ftc.teamcode.subsystems.Odometry;
 import org.firstinspires.ftc.teamcode.subsystems.SuperSystem;
 
@@ -20,6 +21,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     PinpointDrive drive;
     GamepadEx g1;
     double headingOffset;
+    HorizontalArm horizontalArm;
     double left_y, right_y, left_x, right_x, left_t, right_t;
     int directionToGo = 0;
     //this section allows us to access telemetry data from a browser
@@ -28,7 +30,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     SuperSystem superSystem;
     Odometry odometry;
     public static double xSpeedFactor = 0.2;
-    int prescan = 0; // 0 means no prescan, 1 means prep to pickup, 2 means prep to return
+    int prescan = 1; // 0 means no prescan, 1 means prep to pickup, 2 means prep to return
 
 
 
@@ -38,6 +40,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         g1 = new GamepadEx(gamepad1);
         allianceColor = getAllianceColor();
         odometry = new Odometry(hardwareMap);
+        horizontalArm = new HorizontalArm(hardwareMap);
 
         if (allianceColor.equals(AllianceColor.BLUE)) {
             superSystem.setAlliance(true);
@@ -106,12 +109,13 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         if (g1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
                 superSystem.reset();
-            } else if (this.g1.isDown(GamepadKeys.Button.B)) { //really O
+            } else if (this.g1.wasJustPressed(GamepadKeys.Button.B)) { //really O
 //                superSystem.scan(2);
                 if(prescan == 1){
-                    superSystem.toPreScan();
+                    horizontalArm.toScanPos();
                     prescan = 2;
                 } else {
+                    prescan = 1;
                     if (superSystem.getToggleState() == 0) {
                         superSystem.scan(1);
                     } else if (superSystem.getToggleState() == 1) {
