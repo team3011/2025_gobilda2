@@ -43,6 +43,10 @@ public class HorizontalArm {
         }
     }
 
+    public void toPreScanPos(){
+        setTarget(scanPos, timeTransferToScan);
+    }
+
     public void toPickupPos(){
         if (currentPos == scanPos) {
             setTarget(pickupPos, timeScanToPickup);
@@ -57,9 +61,13 @@ public class HorizontalArm {
     }
 
     public void toTransferPos(){
-        if (currentPos == pickupPos) {
+        if (currentPos == pickupPos || currentPos == scanPos) {
             setTarget(transferPos, timePickupToTransfer);
         }
+    }
+
+    public void toTransfer(){
+        setTarget(transferPos, timePickupToTransfer);
     }
 
     public void goToStartPos(){

@@ -33,14 +33,18 @@ public class SuperSystem {
     boolean isScanning = false;
     public static double scanPowerFast = .6;
     public static double scanPowerSlow = .3;
-    public static double upperLimit = .05;
-    public static double lowerLimit = -.05;
+    public static double upperLimit = 0.1;
+    public static double lowerLimit = 0;
     public static int xScanDirection = 0;
     public boolean xReady = false;
     public boolean yReady = false;
     public static double xLeftLimit = -0.15;
     public static double xRightLimit = 0.05;
     public static int scanToggle;
+    public static boolean isLowScanning = false;
+    public boolean isLowPickupPause = false;
+    public boolean prepTransfer = false;
+    public boolean lowTransfer = false;
 
     //set up vision
     RevBlinkinLedDriver blinkin;
@@ -87,6 +91,25 @@ public class SuperSystem {
             armPauseTriggered = true;
             armTimer.reset();
         }
+
+        if (prepTransfer && horizontalSliders.getPositionMM() < 10) {
+            horizontalArm.toTransferPos();
+            horizontalHand.wristTransfer();
+            prepTransfer = false;
+//            while( transferTimer.milliseconds() < transferPause){
+//            }
+//            verticalSystem.prepToStow();
+            lowTransfer = true;
+//            armTimer.reset();
+            transferTimer.reset();
+        }
+
+        if(lowTransfer && transferTimer.milliseconds() > transferPause){
+            lowTransfer = false;
+            verticalSystem.prepToStow();
+            armPauseTriggered = true;
+        }
+
         //we are scanning for an object
         if (isScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
             horizontalHand.setPositionByCamera(myLimeLight.getAngle());
@@ -137,6 +160,55 @@ public class SuperSystem {
             }
         }
 
+        if (isLowScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
+            horizontalHand.setPositionByCamera(myLimeLight.getAngle());
+            dashboardTelemetry.addData("xloc", myLimeLight.getxLoc());
+            //dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
+            //dashboardTelemetry.addData("angle",myLimeLight.getAngle());
+            if(!yReady){
+                if (myLimeLight.getyLoc() == 0){
+                    horizontalSliders.manualInput(scanPowerFast);
+                } else if (myLimeLight.getyLoc() < lowerLimit){
+                    //move out - blue
+                    rgbLED.setPosition(.722); //violet
+                    horizontalSliders.manualInput(scanPowerSlow);
+                } else if (myLimeLight.getyLoc() > upperLimit) {
+                    //move in
+                    horizontalSliders.manualInput(-scanPowerSlow);
+                    rgbLED.setPosition(.333); //orange
+                } else{
+                    yReady = true;
+                    horizontalSliders.manualInput(0);
+                }
+            }else{
+                if (myLimeLight.getxLoc() < xLeftLimit){ //robot moves left
+                    xScanDirection = -1;
+                } else if (myLimeLight.getxLoc() > xRightLimit){ //robot moves right
+                    xScanDirection = 1;
+                }else{
+                    xScanDirection = 0;
+                    xReady = true;
+                }
+            }
+            if(xReady && yReady){
+                //we good
+                //isScanning = false;
+                rgbLED.setPosition(.5); //sets to green
+                horizontalSliders.manualInput(0);
+                //dpad down
+                horizontalArm.toPickupPos();
+                horizontalHand.wristPickup();
+                horizontalHand.openClaw();
+                myLimeLight.stop();
+                isLowScanning = false;
+                headlights.setPower(0);
+                isLowPickupPause = true;
+                pickUpPauseTimer.reset();
+                xReady = false;
+                yReady = false;
+            }
+        }
+
         //we are trying to pick up the object
         if (isPickupPause && pickUpPauseTimer.milliseconds() > pickUpPause) {
             verticalSystem.prepToTransfer();
@@ -151,6 +223,18 @@ public class SuperSystem {
             transferTimer.reset();
             horizontalSliders.setPosition(0);
             isPickupPause = false;
+        }
+
+        if (isLowPickupPause && pickUpPauseTimer.milliseconds() > pickUpPause) {
+            verticalSystem.prepToTransfer();
+            horizontalHand.closeClaw();
+            clawTimer.reset();
+            while (clawTimer.milliseconds() < clawPause) {
+            }
+            horizontalArm.toPreScanPos();
+            horizontalSliders.setPosition(0);
+            horizontalHand.handPar();
+            isLowPickupPause = false;
         }
 
         //update all subsystems
@@ -217,6 +301,18 @@ public class SuperSystem {
         myLimeLight.start(input); //0 red, 1 yellow, 2 blue
     }
 
+    public void lowScan(int input) {
+        scanPause.reset();
+        horizontalHand.wristPickup();
+        horizontalHand.handPar();
+        horizontalHand.openClaw();
+        verticalSystem.goHome();
+        isLowScanning = true;
+        headlights.setPower(1);
+        //***** NEED TO FIX LL PIPELINES BEFORE CHANGING THIS ******
+        myLimeLight.start(input); //0 red, 1 yellow, 2 blue
+    }
+
     public void prepToDropOff(){
         if (toggleState == 0) { //0 is yellow, 1 is color, 2 is lift
             verticalSystem.prepToBasket();
@@ -237,6 +333,14 @@ public class SuperSystem {
         }
     }
 
+    public void lowTransfer(){
+        prepTransfer = true;
+    }
+
+    public void toPickUp() {
+        isPickupPause = true;
+    }
+
     public void toPreScan(){
         horizontalArm.toScanPos();
     }
@@ -246,6 +350,10 @@ public class SuperSystem {
     }
 
     public boolean getIsScanning(){return isScanning; }
+
+    public boolean getIsLowScanning(){
+        return isLowScanning;
+    }
 
     public int getXScanDirection(){return xScanDirection;}
 }

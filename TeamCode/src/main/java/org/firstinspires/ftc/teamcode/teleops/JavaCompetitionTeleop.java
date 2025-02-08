@@ -30,7 +30,7 @@ public abstract class JavaCompetitionTeleop extends OpMode {
     SuperSystem superSystem;
     Odometry odometry;
     public static double xSpeedFactor = 0.2;
-    int prescan = 1; // 0 means no prescan, 1 means prep to pickup, 2 means prep to return
+    int prescan = 0; // 0 means no prescan, 1 means prep to pickup, 2 means prep to return
 
 
 
@@ -74,13 +74,15 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         dashboardTelemetry.addData("direction facing",drive.getHeadingToMaintain());
 
         //driver 1
-        if (!superSystem.getIsScanning()){
+        if (!superSystem.getIsScanning() && !superSystem.getIsLowScanning()){
             if (allianceColor.equals(AllianceColor.BLUE)) {
                 drive.drive2(digitalTransmission(-left_x), digitalTransmission(-left_y), right_x);
             } else {
                 drive.drive2(digitalTransmission(-left_x), digitalTransmission(-left_y), right_x);
             }
-        }else {
+        }else if(superSystem.getIsLowScanning()){
+            drive.drive2(digitalTransmission((double) -superSystem.getXScanDirection() * xSpeedFactor),digitalTransmission(0),0);
+        }else if(superSystem.getIsScanning()){
 //            double directionToGO = superSystem.getXScanDirection();
 //            dashboardTelemetry.addData("xOffset", directionToGo);
 
@@ -112,10 +114,23 @@ public abstract class JavaCompetitionTeleop extends OpMode {
             } else if (this.g1.wasJustPressed(GamepadKeys.Button.B)) { //really O
 //                superSystem.scan(2);
                 if(prescan == 1){
-                    horizontalArm.toScanPos();
+                    superSystem.toPreScan();
                     prescan = 2;
-                } else {
+                } else if (prescan == 2){
+                    if (superSystem.getToggleState() == 0) {
+                        superSystem.lowScan(1);
+                    } else if (superSystem.getToggleState() == 1) {
+                        if (allianceColor.equals(AllianceColor.BLUE)) {
+                            superSystem.lowScan(2);
+                        } else if (allianceColor.equals(AllianceColor.RED)) {
+                            superSystem.lowScan(0);
+                        }
+                    }
+                    prescan = 3;
+                } else if(prescan == 3){
+                    superSystem.lowTransfer();
                     prescan = 1;
+                }else{
                     if (superSystem.getToggleState() == 0) {
                         superSystem.scan(1);
                     } else if (superSystem.getToggleState() == 1) {
