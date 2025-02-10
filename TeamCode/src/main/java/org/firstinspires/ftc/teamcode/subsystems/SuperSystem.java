@@ -33,8 +33,8 @@ public class SuperSystem {
     boolean isScanning = false;
     public static double scanPowerFast = .6;
     public static double scanPowerSlow = .3;
-    public static double upperLimit = 0.1;
-    public static double lowerLimit = 0;
+    public static double upperLimit = 0.135;
+    public static double lowerLimit = 0.035;
     public static int xScanDirection = 0;
     public boolean xReady = false;
     public boolean yReady = false;
@@ -96,9 +96,7 @@ public class SuperSystem {
             horizontalArm.toTransferPos();
             horizontalHand.wristTransfer();
             prepTransfer = false;
-//            while( transferTimer.milliseconds() < transferPause){
-//            }
-//            verticalSystem.prepToStow();
+            transferTimer.reset();
             lowTransfer = true;
 //            armTimer.reset();
             transferTimer.reset();
@@ -108,14 +106,15 @@ public class SuperSystem {
             lowTransfer = false;
             verticalSystem.prepToStow();
             armPauseTriggered = true;
+            armTimer.reset();
         }
 
         //we are scanning for an object
         if (isScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
             horizontalHand.setPositionByCamera(myLimeLight.getAngle());
             dashboardTelemetry.addData("xloc", myLimeLight.getxLoc());
-            //dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
-            //dashboardTelemetry.addData("angle",myLimeLight.getAngle());
+            dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
+//            dashboardTelemetry.addData("angle",myLimeLight.getAngle());
             if(!yReady){
                 if (myLimeLight.getyLoc() == 0){
                     horizontalSliders.manualInput(scanPowerFast);
@@ -163,7 +162,7 @@ public class SuperSystem {
         if (isLowScanning && scanPause.milliseconds() > 1000 && myLimeLight.update()) {
             horizontalHand.setPositionByCamera(myLimeLight.getAngle());
             dashboardTelemetry.addData("xloc", myLimeLight.getxLoc());
-            //dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
+            dashboardTelemetry.addData("yloc",myLimeLight.getyLoc());
             //dashboardTelemetry.addData("angle",myLimeLight.getAngle());
             if(!yReady){
                 if (myLimeLight.getyLoc() == 0){
@@ -286,6 +285,7 @@ public class SuperSystem {
         horizontalHand.handPar();
         verticalSystem.goHome();
         headlights.setPower(0);
+        isLowScanning = false;
     }
 
     public void scan(int input){

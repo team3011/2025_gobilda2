@@ -89,6 +89,10 @@ public class VerticalSystem {
         gripperTarget = 1;
     }
 
+    public void closeGripper(){
+        gripperTarget = 0;
+    }
+
     public void update(){
         if (waitForClip && Math.abs(verticalSliders.getPositionMillimeter()-Height_clipClip) < 10) {
             gripperTarget = 1;

@@ -111,6 +111,11 @@ public abstract class JavaCompetitionTeleop extends OpMode {
         if (g1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             if (this.g1.isDown(GamepadKeys.Button.A)) { //really X
                 superSystem.reset();
+                if(drive.getHeadingToMaintain() == 180){
+                    prescan = 1;
+                }else{
+                    prescan = 0;
+                }
             } else if (this.g1.wasJustPressed(GamepadKeys.Button.B)) { //really O
 //                superSystem.scan(2);
                 if(prescan == 1){
