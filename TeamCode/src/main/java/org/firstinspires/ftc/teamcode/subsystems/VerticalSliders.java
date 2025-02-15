@@ -36,6 +36,7 @@ public class VerticalSliders {
     private boolean holdingPosition = true;
     private int targetPositionMM;
     Telemetry dashboardTelemetry;
+    boolean isLifting = false;
 
     public VerticalSliders(@NonNull HardwareMap hardwareMap, Telemetry db){
         this.rightMotor = hardwareMap.get(DcMotorEx.class,"vertiRight");
@@ -116,7 +117,7 @@ public class VerticalSliders {
     }
 
     public void update(){
-        if (!this.holdingPosition) {
+        if (!this.holdingPosition || isLifting) {
             double pid = 0;
             //get the current position of the sliders
             int currentPosition = getPosition();
@@ -128,24 +129,25 @@ public class VerticalSliders {
             pid += VerticalSliders.kG;
             lastPosition = currentPosition;
 
-
-            if (targetPosition != 0 && Math.abs(pid)< minimumSpeed && Math.abs(currentPosition-lastPosition)<10) {
-                this.holdingPosition = true;
-                if (targetPosition > 100) {
-                    pid = VerticalSliders.kG;
-                }
-            }
-
-            if (this.resetFlag && !this.goingUp && currentPosition < 400) {
-                if (this.getCurrent(1) > maximumMilliamps){
-                    this.resetFlag = false;
+            if (!isLifting) {
+                if (targetPosition != 0 && Math.abs(pid) < minimumSpeed && Math.abs(currentPosition - lastPosition) < 10) {
                     this.holdingPosition = true;
-                    pid = 0;
-                    this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    this.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    this.targetPosition = 0;
-                } else {
-                    pid = -0.4;
+                    if (targetPosition > 100) {
+                        pid = VerticalSliders.kG;
+                    }
+                }
+
+                if (this.resetFlag && !this.goingUp && currentPosition < 400) {
+                    if (this.getCurrent(1) > maximumMilliamps) {
+                        this.resetFlag = false;
+                        this.holdingPosition = true;
+                        pid = 0;
+                        this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        this.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        this.targetPosition = 0;
+                    } else {
+                        pid = -0.4;
+                    }
                 }
             }
 
@@ -179,5 +181,9 @@ public class VerticalSliders {
             input = -limiter;
         }
         return input;
+    }
+
+    public void addPowerForLift(boolean b) {
+        isLifting = b;
     }
 }
